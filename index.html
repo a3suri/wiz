@@ -1,0 +1,3030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Wiz</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Wiz">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0c0f">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#0a0c0f;--panel:#111318;--panel2:#161a22;--border:#1e2330;
+  --accent:#00e5b0;--accent2:#3b6bff;--warn:#f59e0b;--danger:#ef4444;
+  --pos:#10b981;--neg:#ef4444;--text:#e8eaf0;--muted:#5a6278;--subtle:#1e2535;
+  --interp:#e8820c; /* interpolated / estimated data colour */
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden;}
+.header{background:var(--panel);border-bottom:1px solid var(--border);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{font-family:'Bebas Neue',cursive;font-size:21px;letter-spacing:3px;color:var(--accent);}
+.hdate{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+.btn-log{background:var(--accent);color:#000;border:none;border-radius:6px;padding:7px 15px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;}
+.quote-bar{background:linear-gradient(90deg,#0d1018 0%,#111620 50%,#0d1018 100%);border-bottom:1px solid var(--border);padding:8px 20px;text-align:center;min-height:34px;display:flex;align-items:center;justify-content:center;}
+.quote-text{font-family:'DM Sans',sans-serif;font-size:12px;font-style:italic;color:#8a95b0;max-width:700px;opacity:1;transition:opacity .7s ease;user-select:none;}
+.quote-text.fading{opacity:0;}
+.quote-author{color:var(--accent);font-style:normal;font-weight:600;font-size:11px;margin-left:6px;}
+.tabs{display:flex;background:var(--panel);border-bottom:1px solid var(--border);padding:0 18px;overflow-x:auto;}
+.tab{padding:10px 16px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .18s;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.content{padding:14px 18px;max-width:1200px;margin:0 auto;}
+.strip{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px;}
+.scard{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+.slabel{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.9px;margin-bottom:3px;}
+.sval{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;}
+.pos{color:var(--pos);}.neg{color:var(--neg);}.neu{color:var(--text);}
+.interp{color:var(--interp);}
+.interp-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--interp);margin-right:4px;vertical-align:middle;}
+.real-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--pos);margin-right:4px;vertical-align:middle;}
+.data-legend{display:flex;gap:14px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);padding:8px 15px;border-top:1px solid var(--border);}
+.ltable tr.interp-row td{color:var(--interp);}
+.ltable tr.real-row td{color:var(--text);}
+.sec{background:var(--panel);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;}
+.sec-hdr{padding:13px 15px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;}
+.sec-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sec-name{font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:2px;}
+.sec-plat{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+.pill{font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;}
+.pill-green{background:rgba(0,229,176,.1);color:var(--accent);}
+.pill-grey{background:var(--subtle);color:var(--muted);}
+.sec-right{display:flex;align-items:center;gap:12px;}
+.sec-pnl-v{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;}
+.sec-pnl-s{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+.chevron{font-size:11px;color:var(--muted);transition:transform .18s;}
+.chevron.open{transform:rotate(180deg);}
+.mrow{display:grid;gap:1px;background:var(--border);}
+.mcell{background:var(--panel2);padding:10px 13px;}
+.mlabel{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.7px;margin-bottom:3px;}
+.mval{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;}
+.mvs{font-size:10px;color:var(--muted);margin-top:2px;}
+.ahead{color:var(--pos);}.behind{color:var(--neg);}
+.tgt-sec{padding:12px 15px;border-top:1px solid var(--border);}
+.tgt-row{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
+.tgt-row:last-child{margin-bottom:0;}
+.tgt-lbl{font-size:10px;color:var(--muted);width:60px;flex-shrink:0;font-family:'DM Mono',monospace;text-transform:uppercase;}
+.bar-wrap{flex:1;height:4px;background:var(--subtle);border-radius:2px;overflow:hidden;}
+.bar{height:100%;border-radius:2px;transition:width .4s;}
+.tgt-pct{font-family:'DM Mono',monospace;font-size:11px;width:52px;text-align:right;flex-shrink:0;}
+.tgt-goal{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);width:58px;text-align:right;flex-shrink:0;}
+.rpanel{padding:11px 15px;display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--border);}
+.rrow{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:6px;font-size:12px;}
+.rrow.ok{background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);}
+.rrow.warn{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);}
+.rrow.danger{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);}
+.rtext{flex:1;}
+.rbadge{font-family:'DM Mono',monospace;font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;flex-shrink:0;}
+.ok .rbadge{background:rgba(16,185,129,.18);color:var(--pos);}
+.warn .rbadge{background:rgba(245,158,11,.18);color:var(--warn);}
+.danger .rbadge{background:rgba(239,68,68,.18);color:var(--danger);}
+.sec-body.collapsed{display:none;}
+.gap-alert{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:13px 16px;margin-bottom:12px;display:flex;align-items:flex-start;gap:12px;}
+.gap-icon{font-size:20px;flex-shrink:0;}
+.gap-title{font-weight:600;font-size:14px;color:var(--warn);margin-bottom:4px;}
+.gap-sub{font-size:12px;color:#9aa0b0;line-height:1.5;}
+.gap-btn{display:inline-block;margin-top:8px;background:var(--warn);color:#000;border:none;border-radius:5px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:12px;cursor:pointer;}
+.log-wrap{overflow-x:auto;}
+.ltable{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:12px;}
+.ltable th{text-align:left;padding:8px 13px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.9px;border-bottom:1px solid var(--border);background:var(--panel2);white-space:nowrap;}
+.ltable td{padding:9px 13px;border-bottom:1px solid var(--border);white-space:nowrap;}
+.ltable tr:last-child td{border-bottom:none;}
+.ltable tr:hover td{background:var(--panel2);}
+.chart-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;transition:border-color .15s;}
+.chart-card:hover{border-color:rgba(0,229,176,.3);}
+.chart-card:active{border-color:var(--accent);}
+.chart-title{font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--muted);margin-bottom:8px;}
+/* Fullscreen chart overlay */
+.chart-fs-overlay{display:none;position:fixed;inset:0;background:#0a0c0f;z-index:500;flex-direction:column;padding:16px;}
+.chart-fs-overlay.open{display:flex;}
+.chart-fs-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.chart-fs-title{font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--accent);}
+.chart-fs-close{background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;}
+.chart-fs-canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;}
+.chart-tap-hint{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-align:right;margin-top:4px;letter-spacing:.5px;}
+/* RETURN METRICS TAB */
+.rm-tabs{display:flex;gap:0;margin-bottom:14px;background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.rm-tab{flex:1;padding:9px 6px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);cursor:pointer;transition:all .15s;border-right:1px solid var(--border);}
+.rm-tab:last-child{border-right:none;}
+.rm-tab.active{background:var(--accent);color:#000;font-weight:600;}
+.rm-section{display:none;}
+.rm-section.active{display:block;}
+.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
+.metric-grid.wide{grid-template-columns:repeat(4,1fr);}
+.mcard{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:13px;}
+.mcard-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.9px;margin-bottom:5px;}
+.mcard-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;}
+.mcard-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.bench-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:var(--border);margin-bottom:12px;border-radius:8px;overflow:hidden;}
+.bench-cell{background:var(--panel2);padding:10px 14px;}
+.bench-lbl{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;}
+.bench-val{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;}
+.bench-vs{font-size:10px;margin-top:2px;}
+.date-range-row{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:flex-end;margin-bottom:14px;}
+.btn-calc{background:var(--accent2);color:#fff;border:none;border-radius:7px;padding:10px 16px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;}
+.btn-export{background:var(--panel);color:var(--accent);border:1px solid var(--accent);border-radius:7px;padding:9px 16px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:7px;letter-spacing:.5px;}
+.btn-export:hover{background:rgba(0,229,176,.08);}
+.vol-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px;}
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;align-items:flex-end;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--panel);border:1px solid var(--border);border-radius:16px 16px 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;padding:20px;animation:slideUp .22s ease;}
+@keyframes slideUp{from{transform:translateY(36px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.modal-title{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:2px;color:var(--accent);}
+.modal-close{background:var(--subtle);border:none;color:var(--muted);border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
+.fgrp{margin-bottom:13px;}
+.flabel{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.9px;display:block;margin-bottom:5px;}
+.finput,.fsel{width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:14px;outline:none;transition:border-color .18s;-webkit-appearance:none;}
+.finput:focus,.fsel:focus{border-color:var(--accent);}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.fgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;}
+.finfo{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;}
+.finfo.warn{color:var(--warn);}
+.calc-preview{background:var(--subtle);border-radius:7px;padding:11px 13px;margin-bottom:13px;}
+.calc-row{display:flex;justify-content:space-between;margin-bottom:4px;font-family:'DM Mono',monospace;font-size:12px;}
+.calc-row:last-child{margin-bottom:0;padding-top:5px;border-top:1px solid var(--border);}
+.section-label{font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--muted);margin-bottom:10px;margin-top:4px;}
+.divider{height:1px;background:var(--border);margin:14px 0;}
+.btn-submit{width:100%;background:var(--accent);color:#000;border:none;border-radius:8px;padding:13px;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;cursor:pointer;margin-top:4px;}
+.cashflow-note{background:rgba(59,107,255,.08);border:1px solid rgba(59,107,255,.2);border-radius:7px;padding:9px 12px;font-size:12px;color:#8aabff;margin-bottom:14px;line-height:1.5;}
+.capital-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-top:1px solid var(--border);}
+.cap-cell{background:var(--panel2);padding:9px 13px;}
+.cap-lbl{font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;}
+.cap-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;}
+.news-item{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:13px 15px;margin-bottom:10px;}
+/* Investment cards */
+.inv-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.inv-card-hdr{padding:12px 15px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.inv-card-title{font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;}
+.inv-card-body{padding:12px 15px;}
+.inv-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:12px;}
+.inv-row:last-child{border-bottom:none;}
+.inv-key{color:var(--muted);font-size:11px;}
+.inv-val{font-weight:500;}
+.inv-section-hdr{font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--muted);margin:14px 0 8px 0;display:flex;align-items:center;gap:8px;}
+/* Summary */
+.sum-row{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--border);font-size:13px;}
+.sum-row:last-child{border-bottom:none;}
+.sum-flag{font-size:18px;margin-right:6px;}
+.country-bar{height:6px;border-radius:3px;background:var(--accent);margin-top:4px;transition:width .4s;}
+/* Editable badge */
+.edit-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace;}
+.edit-btn:hover{border-color:var(--accent);color:var(--accent);}
+.ni-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;}
+.ni-title{font-weight:600;font-size:13.5px;flex:1;margin-right:10px;}
+.ni-imp{font-size:10px;padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-weight:600;flex-shrink:0;}
+.imp-HIGH{background:rgba(239,68,68,.15);color:var(--danger);}
+.imp-MED{background:rgba(245,158,11,.15);color:var(--warn);}
+.ni-body{font-size:12px;color:#8a95aa;line-height:1.5;}
+.ni-meta{font-size:10px;color:var(--muted);margin-top:5px;font-family:'DM Mono',monospace;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--subtle);border-radius:4px;}
+@media(max-width:600px){
+  .strip{grid-template-columns:repeat(3,1fr);}
+  .metric-grid{grid-template-columns:repeat(2,1fr);}
+  .metric-grid.wide{grid-template-columns:repeat(2,1fr);}
+  .vol-grid{grid-template-columns:repeat(2,1fr);}
+  .bench-row{grid-template-columns:1fr 1fr;}
+  .fgrid{grid-template-columns:1fr;}
+  .fgrid3{grid-template-columns:1fr 1fr;}
+  .date-range-row{grid-template-columns:1fr 1fr;} 
+  .capital-strip{grid-template-columns:repeat(2,1fr);}
+}
+
+/* ── Strategy visibility toggle ── */
+.vis-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:10px 0 4px 0;margin-bottom:10px;}
+.vis-chip{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;
+  font-family:'DM Mono',monospace;font-size:11px;font-weight:500;cursor:pointer;
+  border:1px solid var(--border);background:var(--panel);color:var(--muted);
+  transition:all .18s;user-select:none;}
+.vis-chip.on{color:#000;border-color:transparent;}
+.vis-chip .vis-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.vis-chip.off{opacity:.45;}
+.vis-chip:active{transform:scale(.96);}
+.vis-manage-btn{margin-left:auto;background:none;border:1px solid var(--border);
+  color:var(--muted);border-radius:6px;padding:5px 10px;font-family:'DM Mono',monospace;
+  font-size:10px;cursor:pointer;white-space:nowrap;}
+.vis-manage-btn:hover{border-color:var(--accent);color:var(--accent);}
+.hidden-count{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);
+  padding:4px 10px;background:var(--subtle);border-radius:12px;cursor:pointer;}
+.hidden-count:hover{color:var(--accent);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">WIZ</div>
+  <div class="hdate" id="hdate"></div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button class="btn-log" style="background:var(--panel);color:#a78bfa;border:1px solid rgba(167,139,250,.4);font-size:12px;padding:6px 11px;" onclick="openAddStratModal()" title="Add new strategy">+ STRATEGY</button>
+    <button class="btn-log" style="background:var(--panel);color:#8aabff;border:1px solid rgba(59,107,255,.4);font-size:12px;padding:6px 11px;" onclick="openCcyModal()" title="Change base currency">£$ FX</button>
+    <button class="btn-log" onclick="openLogModal()">+ LOG P&amp;L</button>
+  </div>
+</div>
+
+<div class="quote-bar"><div class="quote-text" id="quoteText"></div></div>
+
+<div class="tabs">
+  <div class="tab active"  onclick="switchTab('dashboard',this)">Dashboard</div>
+  <div class="tab" onclick="switchTab('returns',this)">Returns</div>
+  <div class="tab" onclick="switchTab('log',this)">History</div>
+  <div class="tab" onclick="switchTab('analytics',this)">Charts</div>
+  <div class="tab" onclick="switchTab('investments',this)">Investments</div>
+  <div class="tab" onclick="switchTab('summary',this)">Summary</div>
+  <div class="tab" onclick="switchTab('news',this)">Intel</div>
+</div>
+
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<div id="tab-dashboard" class="content">
+  <div class="strip">
+    <div class="scard"><div class="slabel">Total AUM</div><div class="sval neu" id="tAUM">—</div></div>
+    <div class="scard"><div class="slabel">Total P&amp;L</div><div class="sval neu" id="tPnl">—</div></div>
+    <div class="scard"><div class="slabel">Net Invested</div><div class="sval neu" id="tNet">—</div></div>
+    <div class="scard"><div class="slabel">WTD Avg</div><div class="sval neu" id="tWTD">—</div></div>
+    <div class="scard"><div class="slabel">YTD Avg</div><div class="sval neu" id="tYTD">—</div></div>
+  </div>
+  <div id="gapAlerts"></div>
+  <!-- Visibility toggle bar -->
+  <div class="vis-bar" id="visBar"></div>
+  <div id="sections"></div>
+</div>
+
+<!-- ══════════════ RETURNS METRICS ══════════════ -->
+<div id="tab-returns" class="content" style="display:none;">
+
+  <!-- Period sub-tabs -->
+  <div class="rm-tabs">
+    <div class="rm-tab active" onclick="switchRMTab('itd',this)">ITD</div>
+    <div class="rm-tab" onclick="switchRMTab('ytd',this)">YTD</div>
+    <div class="rm-tab" onclick="switchRMTab('mtd',this)">MTD</div>
+    <div class="rm-tab" onclick="switchRMTab('years',this)">By Year</div>
+    <div class="rm-tab" onclick="switchRMTab('custom',this)">Custom</div>
+  </div>
+
+  <!-- ITD -->
+  <div id="rm-itd" class="rm-section active">
+    <div id="rm-itd-content"></div>
+  </div>
+  <!-- YTD -->
+  <div id="rm-ytd" class="rm-section">
+    <div id="rm-ytd-content"></div>
+  </div>
+  <!-- MTD -->
+  <div id="rm-mtd" class="rm-section">
+    <div id="rm-mtd-content"></div>
+  </div>
+  <!-- By Year -->
+  <div id="rm-years" class="rm-section">
+    <div id="rm-years-content"></div>
+  </div>
+  <!-- Custom Date Range -->
+  <div id="rm-custom" class="rm-section">
+    <div class="sec" style="margin-bottom:14px;">
+      <div style="padding:13px 15px;">
+        <div class="section-label">SELECT DATE RANGE</div>
+        <div class="date-range-row">
+          <div class="fgrp" style="margin:0;">
+            <label class="flabel">From Date</label>
+            <input type="date" class="finput" id="customFrom">
+          </div>
+          <div class="fgrp" style="margin:0;">
+            <label class="flabel">To Date</label>
+            <input type="date" class="finput" id="customTo">
+          </div>
+          <button class="btn-calc" onclick="renderCustomRange()">CALCULATE</button>
+        </div>
+      </div>
+    </div>
+    <div id="rm-custom-content"></div>
+  </div>
+
+  <!-- Benchmark Comparison (always visible) -->
+  <div class="sec" style="margin-bottom:12px;">
+    <div class="sec-hdr" style="cursor:default;">
+      <div class="sec-name" style="font-size:16px;">ACTUAL vs BENCHMARK</div>
+    </div>
+    <div style="padding:14px 15px;" id="benchmarkContent"></div>
+  </div>
+
+  <!-- Volatility -->
+  <div class="sec" style="margin-bottom:12px;">
+    <div class="sec-hdr" style="cursor:default;">
+      <div class="sec-name" style="font-size:16px;">VOLATILITY</div>
+    </div>
+    <div style="padding:14px 15px;" id="volContent"></div>
+  </div>
+
+  <!-- Risk Ratios -->
+  <div class="sec" style="margin-bottom:12px;">
+    <div class="sec-hdr" style="cursor:default;">
+      <div class="sec-name" style="font-size:16px;">RISK-ADJUSTED RATIOS</div>
+    </div>
+    <div style="padding:14px 15px;" id="ratioContent"></div>
+  </div>
+
+  <!-- Export -->
+  <div style="display:flex;justify-content:center;margin-bottom:20px;">
+    <button class="btn-export" onclick="exportToXLSX()">
+      <span>📊</span> EXPORT TO EXCEL / GOOGLE SHEETS / NUMBERS
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════ HISTORY ══════════════ -->
+<div id="tab-log" class="content" style="display:none;">
+  <div class="sec">
+    <div style="padding:13px 15px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <div class="sec-name" style="font-size:16px;">ENTRY HISTORY</div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div class="data-legend" style="border:none;padding:0;">
+          <span><span class="real-dot"></span>Real entry</span>
+          <span><span class="interp-dot"></span>~Interpolated</span>
+        </div>
+        <button class="btn-export" onclick="exportToXLSX()" style="font-size:11px;padding:6px 12px;">📊 Export Excel</button>
+      </div>
+    </div>
+    <div class="log-wrap">
+      <table class="ltable">
+        <thead><tr>
+          <th>Date</th><th>Strategy</th><th>Type</th>
+          <th>Incept.AUM (USD)</th><th>Curr.AUM (USD)</th>
+          <th>Cash In (USD)</th><th>Cash Out (USD)</th><th>Adj.AUM (USD)</th>
+          <th>P&amp;L (USD)</th><th>Period%</th>
+          <th>WTD%</th><th>MTD%</th><th>YTD%</th><th>ITD%</th>
+          <th>SL</th><th>TP</th><th>Notes</th>
+        </tr></thead>
+        <tbody id="logBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ CHARTS ══════════════ -->
+<div id="tab-analytics" class="content" style="display:none;">
+
+  <!-- Currency note -->
+  <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:10px;padding:8px 12px;background:var(--panel);border:1px solid var(--border);border-radius:7px;">
+    💱 All $ values converted to <strong style="color:var(--accent)">USD</strong> using current FX rates.
+    Native currency shown per strategy. &nbsp;
+    <span id="fxRatesDisplay"></span>
+  </div>
+
+  <!-- Combined % returns chart -->
+  <div class="chart-card" onclick="openChartFS('cumPct')">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <div class="chart-title" style="margin-bottom:0;">CUMULATIVE % RETURN — ALL STRATEGIES</div>
+      <span style="font-size:12px;color:var(--muted);">⤢</span>
+    </div>
+    <canvas id="cumPctChart" height="120"></canvas>
+    <div class="chart-tap-hint">TAP TO EXPAND</div>
+  </div>
+
+  <!-- Separate $ P&L chart per strategy -->
+  <div id="stratChartsContainer"></div>
+
+  <!-- Capital movements -->
+  <div class="chart-card" onclick="openChartFS('cash')">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <div class="chart-title" style="margin-bottom:0;">CAPITAL MOVEMENTS (US$)</div>
+      <span style="font-size:12px;color:var(--muted);">⤢</span>
+    </div>
+    <canvas id="cashChart" height="90"></canvas>
+    <div class="chart-tap-hint">TAP TO EXPAND</div>
+  </div>
+</div>
+
+<!-- ══════════════ CHART FULLSCREEN OVERLAY ══════════════ -->
+<div class="chart-fs-overlay" id="chartFSOverlay">
+  <div class="chart-fs-header">
+    <div class="chart-fs-title" id="chartFSTitle">CHART</div>
+    <button class="chart-fs-close" onclick="closeChartFS()">✕ Close</button>
+  </div>
+  <div class="chart-fs-canvas-wrap">
+    <canvas id="chartFSCanvas" style="max-width:100%;max-height:100%;"></canvas>
+  </div>
+</div>
+
+<!-- ══════════════ INVESTMENTS TAB ══════════════ -->
+<div id="tab-investments" class="content" style="display:none;">
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+    <button class="btn-log" style="font-size:12px;padding:7px 14px;" onclick="openAddInvestmentModal('property')">+ Property</button>
+    <button class="btn-log" style="font-size:12px;padding:7px 14px;background:var(--panel);color:#a78bfa;border:1px solid rgba(167,139,250,.3);" onclick="openAddInvestmentModal('pension')">+ Pension</button>
+    <button class="btn-log" style="font-size:12px;padding:7px 14px;background:var(--panel);color:#f59e0b;border:1px solid rgba(245,158,11,.3);" onclick="openAddInvestmentModal('insurance')">+ Insurance</button>
+  </div>
+  <!-- Investment summary strip -->
+  <div class="strip" style="grid-template-columns:repeat(3,1fr);">
+    <div class="scard"><div class="slabel">Total Property (Net Equity)</div><div class="sval neu" id="iSumProperty">—</div></div>
+    <div class="scard"><div class="slabel">Total Pensions (Value)</div><div class="sval neu" id="iSumPension">—</div></div>
+    <div class="scard"><div class="slabel">Total Insurance (Value)</div><div class="sval neu" id="iSumInsurance">—</div></div>
+  </div>
+  <div id="invPropertySection"></div>
+  <div id="invPensionSection"></div>
+  <div id="invInsuranceSection"></div>
+</div>
+
+<!-- ══════════════ SUMMARY TAB ══════════════ -->
+<div id="tab-summary" class="content" style="display:none;">
+  <!-- Grand total strip -->
+  <div class="strip">
+    <div class="scard"><div class="slabel">Grand Total (All Assets)</div><div class="sval neu" id="sumGrandTotal">—</div></div>
+    <div class="scard"><div class="slabel">Trading Strategies</div><div class="sval neu" id="sumTrading">—</div></div>
+    <div class="scard"><div class="slabel">Property (Net Equity)</div><div class="sval neu" id="sumPropTotal">—</div></div>
+    <div class="scard"><div class="slabel">Pensions</div><div class="sval neu" id="sumPensTotal">—</div></div>
+    <div class="scard"><div class="slabel">Insurance</div><div class="sval neu" id="sumInsTotal">—</div></div>
+  </div>
+  <!-- By country breakdown -->
+  <div class="sec" style="margin-bottom:12px;">
+    <div class="sec-hdr" style="cursor:default;"><div class="sec-name" style="font-size:16px;">BY COUNTRY</div></div>
+    <div style="padding:14px 15px;" id="sumByCountry"></div>
+  </div>
+  <!-- By asset class breakdown -->
+  <div class="sec" style="margin-bottom:12px;">
+    <div class="sec-hdr" style="cursor:default;"><div class="sec-name" style="font-size:16px;">BY ASSET CLASS</div></div>
+    <div style="padding:14px 15px;" id="sumByClass"></div>
+  </div>
+  <!-- Per strategy detail -->
+  <div class="sec">
+    <div class="sec-hdr" style="cursor:default;"><div class="sec-name" style="font-size:16px;">ALL STRATEGIES DETAIL</div></div>
+    <div style="padding:14px 15px;" id="sumDetail"></div>
+  </div>
+</div>
+
+<!-- ══════════════ INTEL ══════════════ -->
+<div id="tab-news" class="content" style="display:none;">
+  <div id="newsContainer"></div>
+</div>
+
+<!-- ══════════════ CURRENCY CHANGE MODAL ══════════════ -->
+<div class="overlay" id="ccyOverlay" onclick="olClick(event,'ccyOverlay')">
+<div class="modal">
+  <div class="modal-hdr">
+    <div class="modal-title" style="color:#8aabff;">CHANGE BASE CURRENCY</div>
+    <button class="modal-close" onclick="closeModal('ccyOverlay')">✕</button>
+  </div>
+  <!-- Two-tab layout inside FX modal: FX Rates | Change Strategy CCY -->
+  <div style="display:flex;gap:0;margin-bottom:16px;border:1px solid var(--border);border-radius:7px;overflow:hidden;">
+    <div id="fxTab1Btn" style="flex:1;padding:9px 8px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;background:var(--accent);color:#000;font-weight:600;" onclick="switchFXTab(1)">FX RATES</div>
+    <div id="fxTab2Btn" style="flex:1;padding:9px 8px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;background:var(--panel2);color:var(--muted);" onclick="switchFXTab(2)">CHANGE STRATEGY CCY</div>
+  </div>
+
+  <!-- TAB 1: FX Rate editor -->
+  <div id="fxTab1">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5;">
+      Convention: <strong style="color:var(--text)">BASE/QUOTE</strong> = how many QUOTE per 1 BASE.<br>
+      e.g. <span style="color:var(--accent)">GBP/USD 1.34</span> means £1 = US$1.34 &nbsp;·&nbsp;
+      <span style="color:var(--accent)">USD/INR 96</span> means US$1 = ₹96<br>
+      Cross rates (e.g. CHF/INR) are calculated automatically.
+    </div>
+    <div id="fxRateEditor"></div>
+    <div style="margin-top:12px;padding:10px 13px;background:var(--panel2);border-radius:7px;">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">CALCULATED CROSS RATES</div>
+      <div id="fxCrossRates" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.8;"></div>
+    </div>
+    <button class="btn-submit" style="background:var(--accent2);margin-top:12px;" onclick="saveFxRateEdits()">SAVE RATES</button>
+  </div>
+
+  <!-- TAB 2: Change strategy currency -->
+  <div id="fxTab2" style="display:none;">
+    <div style="background:rgba(59,107,255,.07);border:1px solid rgba(59,107,255,.2);border-radius:7px;padding:10px 13px;margin-bottom:14px;font-size:12px;color:#8aabff;line-height:1.5;">
+      Change a strategy's base currency from a specific date forward.<br>
+      Past entries keep their original currency. USD totals recalculate automatically.
+    </div>
+    <div class="fgrp">
+      <label class="flabel">Strategy</label>
+      <select class="fsel" id="ccyStrat" onchange="renderCcyHistory()">
+        <option value="hedge">Hedge Fund (currently USD)</option>
+        <option value="macro">Macro Trading (currently GBP)</option>
+        <option value="futures">Equity Futures (currently SGD)</option>
+        <option value="equity">Long-Term Equity (currently SGD)</option>
+      </select>
+    </div>
+    <div class="fgrid">
+      <div class="fgrp">
+        <label class="flabel">New Base Currency</label>
+        <select class="fsel" id="ccyNew">
+          <option value="USD">USD — US Dollar</option>
+          <option value="GBP">GBP — British Pound</option>
+          <option value="SGD">SGD — Singapore Dollar</option>
+          <option value="EUR">EUR — Euro</option>
+          <option value="CHF">CHF — Swiss Franc</option>
+          <option value="JPY">JPY — Japanese Yen</option>
+          <option value="AUD">AUD — Australian Dollar</option>
+          <option value="HKD">HKD — Hong Kong Dollar</option>
+          <option value="INR">₹ INR — Indian Rupee</option>
+        </select>
+      </div>
+      <div class="fgrp">
+        <label class="flabel">Effective From Date</label>
+        <input type="date" class="finput" id="ccyFromDate">
+      </div>
+    </div>
+    <div id="ccyCurrentHistory" style="margin-bottom:14px;"></div>
+    <button class="btn-submit" style="background:#3b6bff;" onclick="saveCcyChange()">SAVE CURRENCY CHANGE</button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ ADD STRATEGY MODAL ══════════════ -->
+<div class="overlay" id="addStratOverlay" onclick="olClick(event,'addStratOverlay')">
+<div class="modal">
+  <div class="modal-hdr">
+    <div class="modal-title" style="color:#a78bfa;">ADD NEW STRATEGY</div>
+    <button class="modal-close" onclick="closeModal('addStratOverlay')">&#x2715;</button>
+  </div>
+  <div style="background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.2);border-radius:7px;padding:10px 13px;margin-bottom:16px;font-size:12px;color:#c4b5fd;line-height:1.6;">
+    Create a new trading strategy. It will appear on the Dashboard, Returns, History and Charts tabs alongside your existing strategies.
+  </div>
+  <div class="fgrid">
+    <div class="fgrp">
+      <label class="flabel">Strategy Name</label>
+      <input type="text" class="finput" id="nsName" placeholder="e.g. Mutual Fund">
+    </div>
+    <div class="fgrp">
+      <label class="flabel">Platform / Provider</label>
+      <input type="text" class="finput" id="nsPlatform" placeholder="e.g. Vanguard">
+    </div>
+  </div>
+  <div class="fgrp">
+    <label class="flabel">Strategy Type</label>
+    <select class="fsel" id="nsType">
+      <option value="daily">Trading (daily entries)</option>
+      <option value="wm">Investment (weekly / monthly snapshots)</option>
+    </select>
+  </div>
+  <div class="fgrid">
+    <div class="fgrp">
+      <label class="flabel">Country</label>
+      <input type="text" class="finput" id="nsCountry" placeholder="e.g. United Kingdom">
+    </div>
+    <div class="fgrp">
+      <label class="flabel">Base Currency</label>
+      <select class="fsel" id="nsCcy">
+        <option value="USD">USD — US Dollar</option>
+        <option value="GBP">GBP — British Pound</option>
+        <option value="SGD">SGD — Singapore Dollar</option>
+        <option value="EUR">EUR — Euro</option>
+        <option value="CHF">CHF — Swiss Franc</option>
+        <option value="JPY">JPY — Japanese Yen</option>
+        <option value="AUD">AUD — Australian Dollar</option>
+        <option value="HKD">HKD — Hong Kong Dollar</option>
+        <option value="INR">₹ INR — Indian Rupee</option>
+      </select>
+    </div>
+  </div>
+  <div class="fgrid3">
+    <div class="fgrp">
+      <label class="flabel">Weekly Target %</label>
+      <input type="number" class="finput" id="nsTgtW" placeholder="e.g. 1.0" step="0.1">
+    </div>
+    <div class="fgrp">
+      <label class="flabel">Monthly Target %</label>
+      <input type="number" class="finput" id="nsTgtM" placeholder="e.g. 4.0" step="0.1">
+    </div>
+    <div class="fgrp">
+      <label class="flabel">Annual Target %</label>
+      <input type="number" class="finput" id="nsTgtA" placeholder="e.g. 48.0" step="0.1">
+    </div>
+  </div>
+  <div class="fgrp">
+    <label class="flabel">Accent Colour</label>
+    <input type="color" class="finput" id="nsColor" value="#06b6d4" style="height:44px;padding:4px 8px;cursor:pointer;">
+  </div>
+  <div class="fgrp">
+    <label class="flabel">Inception Date</label>
+    <input type="date" class="finput" id="nsInceptDate">
+  </div>
+  <button class="btn-submit" style="background:#a78bfa;color:#000;" onclick="saveNewStrategy()">CREATE STRATEGY</button>
+</div>
+</div>
+
+<!-- ══════════════ ADD INVESTMENT MODAL ══════════════ -->
+<div class="overlay" id="addInvestmentOverlay" onclick="olClick(event,'addInvestmentOverlay')">
+<div class="modal">
+  <div class="modal-hdr">
+    <div class="modal-title" id="invModalTitle">ADD INVESTMENT</div>
+    <button class="modal-close" onclick="closeModal('addInvestmentOverlay')">&#x2715;</button>
+  </div>
+
+  <!-- PROPERTY FIELDS -->
+  <div id="invFieldsProperty">
+    <div class="fgrp">
+      <label class="flabel">Property Name / Address</label>
+      <input type="text" class="finput" id="iPropName" placeholder="e.g. 12 Oxford Street, London">
+    </div>
+    <div class="fgrid">
+      <div class="fgrp">
+        <label class="flabel">Country</label>
+        <input type="text" class="finput" id="iPropCountry" placeholder="e.g. United Kingdom">
+      </div>
+      <div class="fgrp">
+        <label class="flabel">Base Currency</label>
+        <select class="fsel" id="iPropCcy">
+        <option value="USD">USD — US Dollar</option>
+        <option value="GBP">GBP — British Pound</option>
+        <option value="SGD">SGD — Singapore Dollar</option>
+        <option value="EUR">EUR — Euro</option>
+        <option value="CHF">CHF — Swiss Franc</option>
+        <option value="JPY">JPY — Japanese Yen</option>
+        <option value="AUD">AUD — Australian Dollar</option>
+        <option value="HKD">HKD — Hong Kong Dollar</option>
+        <option value="INR">₹ INR — Indian Rupee</option>
+        </select>
+      </div>
+    </div>
+    <div class="fgrid">
+      <div class="fgrp">
+        <label class="flabel">Purchase Date</label>
+        <input type="date" class="finput" id="iPropDate">
+      </div>
+      <div class="fgrp">
+        <label class="flabel">Purchase Price</label>
+        <input type="number" class="finput" id="iPropPurchase" placeholder="e.g. 500000">
+      </div>
+    </div>
+    <div class="fgrid">
+      <div class="fgrp">
+        <label class="flabel">Current Market Value</label>
+        <input type="number" class="finput" id="iPropMarket" placeholder="e.g. 650000" oninput="calcPropEquity()">
+      </div>
+      <div class="fgrp">
+        <label class="flabel">Outstanding Loan / Mortgage</label>
+        <input type="number" class="finput" id="iPropLoan" placeholder="e.g. 300000" oninput="calcPropEquity()">
+      </div>
+    </div>
+    <div class="fgrp">
+      <label class="flabel">Annual Rental Income (optional)</label>
+      <input type="number" class="finput" id="iPropRental" placeholder="e.g. 24000">
+    </div>
+    <div class="calc-preview" id="propEquityPreview" style="display:none;">
+      <div class="calc-row"><span style="color:var(--muted)">Net Equity</span><span id="pvPropEquity">—</span></div>
+      <div class="calc-row"><span style="color:var(--muted)">Gain on Purchase</span><span id="pvPropGain">—</span></div>
+      <div class="calc-row"><span style="color:var(--muted)">Loan-to-Value</span><span id="pvPropLTV">—</span></div>
+    </div>
+    <div class="fgrp">
+      <label class="flabel">Notes</label>
+      <input type="text" class="finput" id="iPropNotes" placeholder="Type, tenure, agent, etc.">
+    </div>
+  </div>
+
+  <!-- PENSION FIELDS -->
+  <div id="invFieldsPension" style="display:none;">
+    <div class="fgrid">
+      <div class="fgrp">
+        <label class="flabel">Pension Fund Name</label>
+        <input type="text" class="finput" id="iPensName" placeholder="e.g. NHS Pension">
+      </div>
+      <div class="fgrp">
+        <label class="flabel">Provider</label>
+        <input type="text" class="finput" id="iPensProvider" placeholder="e.g. Legal &amp; General">
+      </div>
+    </div>
+    <div class="fgrid">
+      <div class="fgrp">
+        <label class="flabel">Country</label>
+        <input type="text" class="finput" id="iPensCountry" placeholder="e.g. United Kingdom">
+      </div>
+      <div class="fgrp">
+        <label class="flabel">Base Currency</label>
+        <select class="fsel" id="iPensCcy">
+        <option value="USD">USD — US Dollar</option>
+        <option value="GBP">GBP — British Pound</option>
+        <option value="SGD">SGD — Singapore Dollar</option>
+        <option value="EUR">EUR — Euro</option>
+        <option value="CHF">CHF — Swiss Franc</option>
+        <option value="JPY">JPY — Japanese Yen</option>
+        <option value="AUD">AUD — Australian Dollar</option>
+        <option value="HKD">HKD — Hong Kong Dollar</option>
+        <option value="INR">₹ INR — Indian Rupee</option>
+        </select>
+      </div>
+    </div>
+    <div class="fgrid">
+      <div class="fgrp">
+        <label class="flabel">Current Value</label>
+        <input type="number" class="finput" id="iPensValue" placeholder="e.g. 250000">
+      </div>
+      <div class="fgrp">
+        <label class="flabel">Annual Contribution</label>
+        <input type="number" class="finput" id="iPensContrib" placeholder="e.g. 12000">
+      </div>
+    </div>
+    <div class="fgrid">
+      <div class="fgrp">
+        <label class="flabel">Projected Retirement Age</label>
+        <input type="number" class="finput" id="iPensAge" placeholder="e.g. 65">
+      </div>
+      <div class="fgrp">
+        <label class="flabel">As Of Date</label>
+        <input type="date" class="finput" id="iPensDate">
+      </div>
+    </div>
+    <div class="fgrp">
+      <label class="flabel">Notes</label>
+      <input type="text" class="finput" id="iPensNotes" placeholder="DB / DC, employer match, etc.">
+    </div>
+  </div>
+
+  <!-- INSURANCE FIELDS -->
+  <div id="invFieldsInsurance" style="display:none;">
+    <div class="fgrid">
+      <div class="fgrp">
+        <label class="flabel">Policy Name</label>
+        <input type="text" class="finput" id="iInsName" placeholder="e.g. Whole Life Policy">
+      </div>
+      <div class="fgrp">
+        <label class="flabel">Insurer</label>
+        <input type="text" class="finput" id="iInsProvider" placeholder="e.g. Prudential">
+      </div>
+    </div>
+    <div class="fgrid">
+      <div class="fgrp">
+        <label class="flabel">Country</label>
+        <input type="text" class="finput" id="iInsCountry" placeholder="e.g. Singapore">
+      </div>
+      <div class="fgrp">
+        <label class="flabel">Base Currency</label>
+        <select class="fsel" id="iInsCcy">
+        <option value="USD">USD — US Dollar</option>
+        <option value="GBP">GBP — British Pound</option>
+        <option value="SGD">SGD — Singapore Dollar</option>
+        <option value="EUR">EUR — Euro</option>
+        <option value="CHF">CHF — Swiss Franc</option>
+        <option value="JPY">JPY — Japanese Yen</option>
+        <option value="AUD">AUD — Australian Dollar</option>
+        <option value="HKD">HKD — Hong Kong Dollar</option>
+        <option value="INR">₹ INR — Indian Rupee</option>
+        </select>
+      </div>
+    </div>
+    <div class="fgrid">
+      <div class="fgrp">
+        <label class="flabel">Policy Type</label>
+        <select class="fsel" id="iInsType">
+          <option value="whole_life">Whole Life</option>
+          <option value="term">Term Life</option>
+          <option value="endowment">Endowment</option>
+          <option value="ilp">Investment-Linked (ILP)</option>
+          <option value="annuity">Annuity</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="fgrp">
+        <label class="flabel">Sum Assured / Cover</label>
+        <input type="number" class="finput" id="iInsAssured" placeholder="e.g. 500000">
+      </div>
+    </div>
+    <div class="fgrid">
+      <div class="fgrp">
+        <label class="flabel">Current Surrender / Cash Value</label>
+        <input type="number" class="finput" id="iInsValue" placeholder="e.g. 85000">
+      </div>
+      <div class="fgrp">
+        <label class="flabel">Annual Premium</label>
+        <input type="number" class="finput" id="iInsPremium" placeholder="e.g. 6000">
+      </div>
+    </div>
+    <div class="fgrid">
+      <div class="fgrp">
+        <label class="flabel">Policy Start Date</label>
+        <input type="date" class="finput" id="iInsDate">
+      </div>
+      <div class="fgrp">
+        <label class="flabel">Maturity Date (if applicable)</label>
+        <input type="date" class="finput" id="iInsMaturity">
+      </div>
+    </div>
+    <div class="fgrp">
+      <label class="flabel">Notes</label>
+      <input type="text" class="finput" id="iInsNotes" placeholder="Beneficiaries, riders, etc.">
+    </div>
+  </div>
+
+  <button class="btn-submit" id="saveInvBtn" onclick="saveInvestment()">SAVE</button>
+</div>
+</div>
+
+<!-- ══════════════ LOG MODAL ══════════════ -->
+<div class="overlay" id="logOverlay" onclick="olClick(event,'logOverlay')">
+<div class="modal">
+  <div class="modal-hdr">
+    <div class="modal-title" id="modalTitle">LOG P&amp;L ENTRY</div>
+    <button class="modal-close" onclick="closeModal('logOverlay')">✕</button>
+  </div>
+
+  <div class="fgrp">
+    <label class="flabel">Strategy</label>
+    <select class="fsel" id="fStrat" onchange="onStratChange()">
+      <option value="hedge">Hedge Fund</option>
+      <option value="macro">Macro Trading (IG)</option>
+      <option value="futures">Equity Futures (IBKR)</option>
+      <option value="equity">Long-Term Equity Portfolio</option>
+    </select>
+  </div>
+
+  <div class="fgrp">
+    <label class="flabel">Entry Type</label>
+    <div id="entryTypeBadge" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);padding:3px 0;"></div>
+    <div class="finfo" id="entryTypeInfo"></div>
+  </div>
+
+  <div class="fgrid">
+    <div class="fgrp">
+      <label class="flabel">Entry Date <span style="color:var(--accent);font-size:9px;">— any past date OK</span></label>
+      <input type="date" class="finput" id="fDate" onchange="onDateChange()">
+    </div>
+    <div class="fgrp" id="periodLabelRow">
+      <label class="flabel">Period</label>
+      <div class="finput" id="periodLabel" style="color:var(--muted);font-size:12px;padding:10px 12px;background:var(--subtle);"></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-label">AUM SNAPSHOT</div>
+
+  <div class="fgrp" id="inceptAUMRow">
+    <label class="flabel">Inception AUM ($) <span style="color:var(--muted);font-size:9px;">— starting capital, set once</span></label>
+    <input type="number" class="finput" id="fInceptAUM" placeholder="e.g. 5000000" oninput="onInputChange()">
+    <div class="finfo" id="inceptNote"></div>
+  </div>
+
+  <div class="fgrp">
+    <label class="flabel">Current AUM as of Entry Date ($)</label>
+    <input type="number" class="finput" id="fCurrAUM" placeholder="e.g. 5250000" oninput="onInputChange()">
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-label">CAPITAL MOVEMENTS <span style="font-size:10px;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:400;text-transform:none;letter-spacing:0;">— optional</span></div>
+
+  <div class="cashflow-note">
+    Capital <strong>additions</strong> are added to AUM from start of the current month.<br>
+    Capital <strong>withdrawals</strong> are deducted from AUM from start of the current month.<br>
+    Both are tracked separately and excluded from P&amp;L return calculations.
+  </div>
+
+  <div class="fgrid">
+    <div class="fgrp">
+      <label class="flabel">Capital Added ($)</label>
+      <input type="number" class="finput" id="fCashIn" placeholder="0" oninput="onInputChange()">
+    </div>
+    <div class="fgrp">
+      <label class="flabel">Capital Withdrawn ($)</label>
+      <input type="number" class="finput" id="fCashOut" placeholder="0" oninput="onInputChange()">
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div id="dailyFieldsWrap">
+    <div class="section-label">RISK LEVELS</div>
+    <div class="fgrid">
+      <div class="fgrp">
+        <label class="flabel">Stop Loss</label>
+        <input type="text" class="finput" id="fSL" placeholder="-2% or -$20,000">
+      </div>
+      <div class="fgrp">
+        <label class="flabel">Take Profit</label>
+        <input type="text" class="finput" id="fTP" placeholder="+5%">
+      </div>
+    </div>
+    <div class="divider"></div>
+  </div>
+
+  <div class="fgrp">
+    <label class="flabel">Notes</label>
+    <input type="text" class="finput" id="fNotes" placeholder="Positions, themes, catalysts…">
+  </div>
+
+  <!-- Live calculation preview -->
+  <div class="calc-preview" id="calcPreview" style="display:none;">
+    <div class="calc-row"><span style="color:var(--muted)">Prev AUM used</span><span id="pvPrev">—</span></div>
+    <div class="calc-row"><span style="color:var(--muted)">Adj. for capital flows</span><span id="pvAdj">—</span></div>
+    <div class="calc-row"><span style="color:var(--muted)">Period P&amp;L</span><span id="pvPnl">—</span></div>
+    <div class="calc-row"><span style="color:var(--muted)">Period Return</span><span id="pvPct">—</span></div>
+    <div class="calc-row"><span style="color:var(--muted)">ITD Return</span><span id="pvITD">—</span></div>
+    <div class="calc-row"><span style="color:var(--muted)">vs Weekly Target</span><span id="pvWtgt">—</span></div>
+  </div>
+
+  <button class="btn-submit" onclick="submitEntry()">SAVE ENTRY</button>
+</div>
+</div>
+
+<!-- ══════════════ GAP MODAL ══════════════ -->
+<div class="overlay" id="gapOverlay" onclick="olClick(event,'gapOverlay')">
+<div class="modal">
+  <div class="modal-hdr">
+    <div class="modal-title" style="color:var(--warn);">FILL MISSING PERIOD DATA</div>
+    <button class="modal-close" onclick="closeModal('gapOverlay')">✕</button>
+  </div>
+  <div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:7px;padding:10px 13px;margin-bottom:14px;font-size:12px;color:#c8a95a;line-height:1.5;" id="gapInfo"></div>
+  <div id="gapFields"></div>
+  <button class="btn-submit" style="background:var(--warn);" onclick="submitGap()">SAVE PERIOD-END DATA</button>
+</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// STRATEGY CONFIG
+// ═══════════════════════════════════════════════════════════════════════
+// ─── REPORTING CURRENCY ───────────────────────────────────────────
+const REPORT_CCY = 'USD';
+
+// ─── STRATEGY CONFIG ──────────────────────────────────────────────
+// baseCcy: current base currency for new entries
+// ccyHistory: [{fromDate, ccy}] — sorted ascending, allows currency changes
+//   All AUM values stored in baseCcy at time of entry.
+//   On display / export, we convert to USD using fxRate(ccy, date).
+const S = {
+  hedge: {
+    name:'Hedge Fund', platform:'Internal', color:'#00e5b0', freq:'daily',
+    target:{weekly:1.0,monthly:4.0,annual:52.0},
+    baseCcy:'USD',
+    ccyHistory:[{fromDate:'2023-01-01',ccy:'USD'}]
+  },
+  macro: {
+    name:'Macro Trading', platform:'IG Markets', color:'#3b6bff', freq:'daily',
+    target:{weekly:10.0,monthly:50.0,annual:600.0},
+    baseCcy:'GBP',
+    ccyHistory:[{fromDate:'2023-04-01',ccy:'GBP'}]
+  },
+  futures: {
+    name:'Equity Futures', platform:'IBKR', color:'#f59e0b', freq:'daily',
+    target:{weekly:5.0,monthly:20.0,annual:240.0},
+    baseCcy:'SGD',
+    ccyHistory:[{fromDate:'2023-07-01',ccy:'SGD'}]
+  },
+  equity: {
+    name:'Long-Term Equity', platform:'Portfolio', color:'#a855f7', freq:'wm',
+    target:{weekly:1.0,monthly:4.0,annual:48.0},
+    baseCcy:'SGD',
+    ccyHistory:[{fromDate:'2023-01-01',ccy:'SGD'}]
+  },
+};
+
+// ════════════════════════════════════════════════════════════════════
+// FX ENGINE
+// ─────────────────────────────────────────────────────────────────
+// Convention: FX_DIRECT[BASE][QUOTE] = how many QUOTE per 1 BASE
+//   e.g. GBP/USD 1.34  → £1 buys US$1.34
+//        USD/INR 96     → US$1 buys ₹96
+//        GBP/CHF 1.05   → £1 buys CHF 1.05
+//
+// Cross rates are calculated automatically via USD as the pivot:
+//   rate(A→B) = rate(A→USD) / rate(B→USD)   [when not directly quoted]
+//   But if a direct quote exists, that takes priority.
+// ════════════════════════════════════════════════════════════════════
+
+// Direct quoted rates — stored exactly as shown (BASE/QUOTE = n)
+// All values are user-editable from the FX panel.
+const FX_DIRECT = {
+  'GBP/USD': 1.34,
+  'EUR/USD': 1.12,
+  'CHF/USD': 1.25,
+  'AUD/USD': 0.655,
+  'SGD/USD': 0.740,
+  'HKD/USD': 0.128,
+  'JPY/USD': 0.0066,
+  'USD/INR': 96.0,
+  'GBP/CHF': 1.05,
+  'GBP/EUR': 1.15,
+  'GBP/INR': 126.0,
+  'EUR/INR': 110.0,
+  'EUR/CHF': 0.935,
+  'CHF/INR': 106.0,
+};
+
+// Persisted overrides (from FX panel edits)
+let FX_OVERRIDES = JSON.parse(localStorage.getItem('wiz_fx_overrides') || '{}');
+function saveFxOverrides() { localStorage.setItem('wiz_fx_overrides', JSON.stringify(FX_OVERRIDES)); }
+function loadFxOverrides() { FX_OVERRIDES = JSON.parse(localStorage.getItem('wiz_fx_overrides') || '{}'); }
+
+// Get effective direct table (defaults + overrides)
+function getFxTable() {
+  return Object.assign({}, FX_DIRECT, FX_OVERRIDES);
+}
+
+// Get rate BASE → QUOTE (how many QUOTE per 1 BASE)
+// Priority: direct quote → inverse direct → cross via USD
+function fxRate(base, quote) {
+  if (base === quote) return 1.0;
+  const tbl = getFxTable();
+  const key  = base  + '/' + quote;
+  const ikey = quote + '/' + base;
+
+  // 1. Direct quote
+  if (tbl[key]  !== undefined) return tbl[key];
+
+  // 2. Inverse of direct quote
+  if (tbl[ikey] !== undefined) return 1.0 / tbl[ikey];
+
+  // 3. Cross via USD as pivot
+  const baseToUSD  = fxRate(base,  'USD');
+  const quoteToUSD = fxRate(quote, 'USD');
+  if (quoteToUSD > 0) return baseToUSD / quoteToUSD;
+
+  return 1.0; // fallback
+}
+
+// Get BASE → USD rate (the one used for all USD conversion)
+function toUSDRate(ccy) { return fxRate(ccy, 'USD'); }
+
+// Convert amount in ccy → USD
+function toUSD(amount, ccy) { return amount * toUSDRate(ccy); }
+
+// Convert amount between any two currencies
+function convertCcy(amount, fromCcy, toCcy) { return amount * fxRate(fromCcy, toCcy); }
+
+// Shorthand: fxDisplay returns a human-readable rate string
+// following the user's preferred convention
+const FX_DISPLAY_PAIRS = [
+  ['GBP','USD'], ['CHF','USD'], ['EUR','USD'],
+  ['AUD','USD'], ['SGD','USD'], ['HKD','USD'], ['JPY','USD'],
+  ['USD','INR'],
+  ['GBP','CHF'], ['GBP','EUR'], ['GBP','INR'],
+  ['EUR','INR'], ['EUR','CHF'], ['CHF','INR'],
+];
+
+function fxRateDisplay(base, quote) {
+  const rate = fxRate(base, quote);
+  // INR pairs show as integer; JPY shows 4dp; others 4dp
+  if (quote === 'INR' || base === 'INR') return rate.toFixed(2);
+  if (base === 'JPY'  || quote === 'JPY') return rate.toFixed(4);
+  return rate.toFixed(4);
+}
+
+// Currency display symbols
+const CCY_SYM = {
+  USD:'US$', GBP:'£', SGD:'S$', EUR:'€',
+  CHF:'CHF', JPY:'¥', AUD:'A$', HKD:'HK$', INR:'₹',
+};
+const ccySym = c => CCY_SYM[c] || c;
+
+// For FX_RATES backward compat (used in a few places for display)
+const FX_RATES = new Proxy({}, {
+  get: (_, ccy) => toUSDRate(ccy) || 1
+});
+
+// Get base currency for a strategy at a specific date
+function stratCcyAtDate(stratId, date) {
+  const hist = S[stratId] ? (S[stratId].ccyHistory || [{fromDate:'2000-01-01', ccy:'USD'}]) : [{fromDate:'2000-01-01',ccy:'USD'}];
+  const sorted = [...hist].sort((a,b)=>a.fromDate.localeCompare(b.fromDate));
+  let ccy = sorted[0].ccy;
+  for(const h of sorted) { if(date >= h.fromDate) ccy = h.ccy; }
+  return ccy;
+}
+
+// Convert AUM entry to USD using the strategy's currency at that date
+function entryToUSD(e) {
+  const ccy = stratCcyAtDate(e.strategy, e.date);
+  return {
+    currAUM_usd:  toUSD(e.currAUM  || 0, ccy),
+    adjAUM_usd:   toUSD(e.adjAUM   || e.currAUM || 0, ccy),
+    pnl_usd:      toUSD(e.pnl      || 0, ccy),
+    cashIn_usd:   toUSD(e.cashIn   || 0, ccy),
+    cashOut_usd:  toUSD(e.cashOut  || 0, ccy),
+    inceptAUM_usd:toUSD(e.inceptAUM|| 0, ccy),
+    ccy,
+  };
+}
+
+// Change base currency for a strategy from a given date forward
+function changeStratCcy(stratId, newCcy, fromDate) {
+  if(!S[stratId]) return;
+  S[stratId].baseCcy = newCcy;
+  S[stratId].ccyHistory.push({fromDate, ccy: newCcy});
+  S[stratId].ccyHistory.sort((a,b)=>a.fromDate.localeCompare(b.fromDate));
+  // Persist ccy history changes
+  const stored = JSON.parse(localStorage.getItem('wiz_ccy') || '{}');
+  stored[stratId] = S[stratId].ccyHistory;
+  localStorage.setItem('wiz_ccy', JSON.stringify(stored));
+}
+
+// Load saved currency history on startup
+function loadCcyHistory() {
+  const stored = JSON.parse(localStorage.getItem('wiz_ccy') || '{}');
+  Object.entries(stored).forEach(([id, hist]) => {
+    if(S[id]) {
+      S[id].ccyHistory = hist;
+      S[id].baseCcy = hist[hist.length-1].ccy;
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// DATA STORE
+// Entry schema: { id, strategy, date, inceptAUM, currAUM,
+//   cashIn, cashOut, adjAUM, pnl, pct, sl, tp, notes, entryType,
+//   isInterp }   ← isInterp=true means this is a computed straight-line point
+// ═══════════════════════════════════════════════════════════════════════
+let DB = JSON.parse(localStorage.getItem('wiz_v3') || '[]');
+const save = () => localStorage.setItem('wiz_v3', JSON.stringify(DB));
+
+// ═══════════════════════════════════════════════════════════════════════
+// DATE UTILS
+// ═══════════════════════════════════════════════════════════════════════
+const todayStr = () => new Date().toISOString().split('T')[0];
+const wkStart  = d => { const dt=new Date(d),day=dt.getDay(),diff=day===0?-6:1-day; dt.setDate(dt.getDate()+diff); return dt.toISOString().split('T')[0]; };
+const moStart  = d => d.slice(0,7)+'-01';
+const yrStart  = d => d.slice(0,4)+'-01-01';
+const fmtD     = s => new Date(s).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+const daysBetween = (a,b) => (new Date(b)-new Date(a))/86400000;
+const addDays  = (d,n) => { const dt=new Date(d); dt.setDate(dt.getDate()+n); return dt.toISOString().split('T')[0]; };
+
+// ═══════════════════════════════════════════════════════════════════════
+// FORMAT HELPERS
+// ═══════════════════════════════════════════════════════════════════════
+const f2   = n=>(n==null||isNaN(n))?'—':n.toFixed(2);
+const fPct = n=>(n==null||isNaN(n))?'—':(n>=0?'+':'')+n.toFixed(2)+'%';
+const fUSD = n=>{if(n==null||isNaN(n))return'—';const a=Math.abs(n);const s=a>=1e6?(a/1e6).toFixed(3)+'M':a>=1e3?(a/1e3).toFixed(1)+'K':a.toFixed(0);return(n<0?'-':'')+'$'+s;};
+const cc   = n=>n>0?'pos':n<0?'neg':'neu';
+
+// ═══════════════════════════════════════════════════════════════════════
+// INTERPOLATION ENGINE
+// ─────────────────────────────────────────────────────────────────────
+// Between any two real entries A (date_A, aum_A) and B (date_B, aum_B):
+//   - AUM moves linearly day-by-day from aum_A to aum_B
+//   - Each interpolated day's pct = (daily_aum_gain / prev_aum) * 100
+//   - Interpolated points carry isInterp=true
+//   - If a real entry is later added for an in-between date, it replaces
+//     the interpolated value and triggers a full rebuild of that gap
+// getFullSeries(id) returns ALL real + interpolated entries sorted by date
+// ═══════════════════════════════════════════════════════════════════════
+
+function getFullSeries(id) {
+  const real = DB.filter(e=>e.strategy===id && !e.isInterp)
+                 .sort((a,b)=>a.date.localeCompare(b.date));
+  if(real.length===0) return [];
+  if(real.length===1) return [real[0]];
+
+  const result = [];
+
+  for(let i=0;i<real.length;i++){
+    result.push(real[i]); // always include real entry
+
+    if(i<real.length-1){
+      const entA = real[i];
+      const entB = real[i+1];
+      const span = daysBetween(entA.date, entB.date); // total days in gap
+
+      if(span<=1) continue; // adjacent days, no gap to fill
+
+      // Linear interpolation parameters
+      // We interpolate adjAUM linearly.
+      // Capital flows at entB affect entB only — don't smear across gap.
+      const aumA = entA.adjAUM || entA.currAUM;
+      // For entB, remove its own cashIn/cashOut to get the "trading-only" endpoint
+      const cashNetB = (entB.cashIn||0) - (entB.cashOut||0);
+      const aumB_trading = (entB.adjAUM||entB.currAUM) - cashNetB;
+      const totalGain = aumB_trading - aumA;
+      const dailyGain = totalGain / span; // $ per day, straight line
+
+      for(let d=1;d<span;d++){
+        const iDate = addDays(entA.date, d);
+        // Don't insert if a real entry exists for this date
+        if(real.some(e=>e.date===iDate)) continue;
+
+        const prevAUM = aumA + dailyGain*(d-1);
+        const currAUM = aumA + dailyGain*d;
+        const pnl = currAUM - prevAUM; // = dailyGain always
+        const pct = prevAUM>0 ? (pnl/prevAUM)*100 : 0;
+
+        result.push({
+          id:       'interp_'+id+'_'+iDate,
+          strategy: id,
+          date:     iDate,
+          inceptAUM: entA.inceptAUM,
+          currAUM:  currAUM,
+          adjAUM:   currAUM,
+          cashIn:   0, cashOut: 0,
+          pnl, pct,
+          sl:'', tp:'',
+          notes: '~ Interpolated (straight-line estimate)',
+          entryType: 'interpolated',
+          isInterp: true,
+        });
+      }
+    }
+  }
+
+  return result.sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// CORE CALCULATIONS  (now use getFullSeries instead of stratEntries)
+// ═══════════════════════════════════════════════════════════════════════
+function stratEntries(id){
+  return DB.filter(e=>e.strategy===id).sort((a,b)=>a.date.localeCompare(b.date));
+}
+function stratReal(id){
+  return DB.filter(e=>e.strategy===id&&!e.isInterp).sort((a,b)=>a.date.localeCompare(b.date));
+}
+function getLatest(id){ const es=stratReal(id); return es.length?es[es.length-1]:null; }
+function getFirst(id){  const es=stratReal(id); return es.length?es[0]:null; }
+function getInceptAUM(id){ const f=getFirst(id); return f?f.inceptAUM:null; }
+
+// Get interpolated AUM for any date — used when no real entry exists
+function getAUMAtDate(id, date){
+  const full = getFullSeries(id);
+  const entry = full.find(e=>e.date===date);
+  if(entry) return {aum:entry.adjAUM||entry.currAUM, isInterp:entry.isInterp||false};
+  // date is beyond last entry — use last known
+  const before = full.filter(e=>e.date<=date);
+  if(before.length) return {aum:before[before.length-1].currAUM, isInterp:true};
+  return null;
+}
+
+// Compound return over date range — uses full series including interpolated
+function compoundReturn(id, fromDate, toDate){
+  const full = getFullSeries(id).filter(e=>e.date>=fromDate && e.date<=toDate);
+  if(!full.length) return {val:null, hasInterp:false};
+  let cum=1, hasInterp=false;
+  full.forEach(e=>{
+    cum*=(1+e.pct/100);
+    if(e.isInterp) hasInterp=true;
+  });
+  return {val:(cum-1)*100, hasInterp};
+}
+
+// Total capital in / out for a strategy — values in USD
+function capitalSummary(id){
+  const es = stratReal(id);
+  // Sum each entry converted to USD at its own date's fx rate
+  const totalIn  = es.reduce((s,e)=>s+toUSD(e.cashIn||0,  stratCcyAtDate(id,e.date)),0);
+  const totalOut = es.reduce((s,e)=>s+toUSD(e.cashOut||0, stratCcyAtDate(id,e.date)),0);
+  const first    = es.length ? es[0] : null;
+  const inceptAUM_usd = first ? toUSD(first.inceptAUM||0, stratCcyAtDate(id,first.date)) : 0;
+  const latest   = getLatest(id);
+  const currAUM_usd   = latest ? toUSD(latest.currAUM||0, stratCcyAtDate(id,latest.date)) : 0;
+  const netInvested   = inceptAUM_usd + totalIn - totalOut;
+  const totalPnL      = currAUM_usd - netInvested;
+  const baseCcy       = S[id].baseCcy;
+  return {totalIn,totalOut,netInvested,currAUM:currAUM_usd,totalPnL,inceptAUM:inceptAUM_usd,baseCcy};
+}
+
+function calcMetrics(id, asOfDate){
+  const full = getFullSeries(id).filter(e=>e.date<=asOfDate);
+  if(!full.length) return null;
+  const latest = full[full.length-1];
+  const first  = full[0];
+  const cs = capitalSummary(id);
+  const wtd = compoundReturn(id, wkStart(asOfDate), asOfDate);
+  const mtd = compoundReturn(id, moStart(asOfDate), asOfDate);
+  const ytd = compoundReturn(id, yrStart(asOfDate), asOfDate);
+  const itd = compoundReturn(id, first.date, asOfDate);
+  return {
+    pct:      latest.pct,
+    pnl:      latest.pnl,
+    currAUM:  latest.currAUM,
+    adjAUM:   latest.adjAUM||latest.currAUM,
+    inceptAUM:first.inceptAUM,
+    isInterp: latest.isInterp||false,
+    sl:latest.sl, tp:latest.tp, notes:latest.notes, date:latest.date,
+    wtd:wtd.val,   wtdInterp:wtd.hasInterp,
+    mtd:mtd.val,   mtdInterp:mtd.hasInterp,
+    ytd:ytd.val,   ytdInterp:ytd.hasInterp,
+    itd:itd.val,   itdInterp:itd.hasInterp,
+    capitalSummary:cs,
+  };
+}
+
+// Return series — full series including interpolated points
+function returnSeries(id){
+  return getFullSeries(id).map(e=>({
+    date:e.date, pct:e.pct, pnl:e.pnl, currAUM:e.currAUM,
+    cashIn:e.cashIn||0, cashOut:e.cashOut||0, isInterp:e.isInterp||false
+  }));
+}
+
+// Helper: format a value with interp indicator
+function fPctI(val, isInterp){
+  if(val==null||isNaN(val)) return '—';
+  const s = fPct(val);
+  return isInterp ? `<span class="interp">~${s}</span>` : `<span class="pos">${s}</span>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// GAP DETECTION — gaps are now INFORMATIONAL ONLY
+// The interpolation engine fills them automatically.
+// We only surface a gentle note if the most recent gap > 30 days
+// so the user knows they might want to add a real checkpoint.
+// ═══════════════════════════════════════════════════════════════════════
+function detectGaps(id){
+  const es = stratReal(id);
+  if(es.length<2) return [];
+  const today = todayStr();
+  const lastReal = es[es.length-1].date;
+  const daysSince = daysBetween(lastReal, today);
+  // Only flag if it's been more than 30 days since last real entry
+  if(daysSince < 30) return [];
+  return [{
+    type:'info',
+    date: today,
+    label: `Last real entry was ${Math.round(daysSince)} days ago (${fmtD(lastReal)}). Returns since then are interpolated.`
+  }];
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// STRATEGY VISIBILITY
+// ─────────────────────────────────────────────────────────────────────
+// hiddenStrategies: Set of strategy IDs hidden from dashboard
+// Persisted in localStorage. ALL totals and metrics reflect ONLY
+// the currently visible strategies — hidden strategies are fully
+// excluded from every number shown anywhere in the app.
+// ═══════════════════════════════════════════════════════════════════════
+let hiddenStrategies = new Set(
+  JSON.parse(localStorage.getItem('wiz_hidden') || '[]')
+);
+function saveHidden() {
+  localStorage.setItem('wiz_hidden', JSON.stringify([...hiddenStrategies]));
+}
+
+// Returns only the currently visible strategy IDs
+function visibleIds() {
+  return Object.keys(S).filter(id => !hiddenStrategies.has(id));
+}
+// Returns visible entries of S as [id, strat] pairs
+function visibleEntries() {
+  return Object.entries(S).filter(([id]) => !hiddenStrategies.has(id));
+}
+
+function toggleStratVisibility(id) {
+  if (hiddenStrategies.has(id)) {
+    hiddenStrategies.delete(id);
+  } else {
+    hiddenStrategies.add(id);
+  }
+  saveHidden();
+  renderAll(); // refresh dashboard + log
+}
+
+function showAllStrategies() {
+  hiddenStrategies.clear();
+  saveHidden();
+  renderAll();
+}
+
+function renderVisBar() {
+  const bar = document.getElementById('visBar');
+  if (!bar) return;
+  const ids = Object.keys(S);
+  const hiddenCount = ids.filter(id => hiddenStrategies.has(id)).length;
+
+  // Label indicating filtering is active
+  let html = '<div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-right:4px;padding-top:1px;flex-shrink:0;">'
+    + (hiddenCount > 0 ? '<span style="color:var(--warn);">● FILTERED</span>' : 'VIEW') + '</div>';
+  ids.forEach(id => {
+    const strat = S[id];
+    const isOn  = !hiddenStrategies.has(id);
+    const bg    = isOn ? strat.color : 'var(--panel)';
+    const dotBg = strat.color;
+    html += `<div class="vis-chip ${isOn ? 'on' : 'off'}"
+      style="${isOn ? 'background:' + strat.color + ';' : ''}"
+      onclick="toggleStratVisibility('${id}')"
+      title="${isOn ? 'Click to hide' : 'Click to show'} ${strat.name}">
+      <div class="vis-dot" style="background:${isOn ? '#000' : strat.color};"></div>
+      <span style="${isOn ? 'color:#000;' : ''}">${strat.name.split(' ')[0]}</span>
+    </div>`;
+  });
+
+  if (hiddenCount > 0) {
+    html += `<span class="hidden-count" onclick="showAllStrategies()" title="Show all strategies">
+      +${hiddenCount} hidden — show all
+    </span>`;
+  }
+
+  bar.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// RENDER DASHBOARD
+// ═══════════════════════════════════════════════════════════════════════
+function renderDashboard(){
+  const today=todayStr();
+  let totalAUM=0,totalPnL=0,totalNet=0,wtdA=[],ytdA=[];
+  const secEl=document.getElementById('sections');
+  secEl.innerHTML='';
+
+  // Gap alerts
+  let allGaps=[];
+  visibleIds().forEach(id=>{ detectGaps(id).forEach(g=>allGaps.push({...g,id,name:S[id].name})); });
+  const gapEl=document.getElementById('gapAlerts');
+  if(allGaps.length){
+    const byStrat={};
+    allGaps.forEach(g=>{ if(!byStrat[g.id])byStrat[g.id]=[]; byStrat[g.id].push(g); });
+    gapEl.innerHTML=Object.entries(byStrat).map(([id,gs])=>`
+    <div style="background:rgba(232,130,12,.06);border:1px solid rgba(232,130,12,.2);border-radius:8px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px;">
+      <span style="font-size:16px;flex-shrink:0;">🟠</span>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--interp);margin-bottom:3px;">${S[id].name} — using interpolated estimates</div>
+        <div style="font-size:11px;color:#9aa0b0;line-height:1.5;">${gs[0].label}<br>Add a real entry any time to sharpen accuracy.</div>
+      </div>
+    </div>`).join('');
+  } else { gapEl.innerHTML=''; }
+
+  // Accumulate totals for VISIBLE strategies only
+  visibleEntries().forEach(([id,strat])=>{
+    const m=calcMetrics(id,today);
+    const cs=capitalSummary(id);
+    if(m){ totalAUM+=m.currAUM; totalPnL+=cs.totalPnL; totalNet+=cs.netInvested; if(m.wtd!==null)wtdA.push(m.wtd); if(m.ytd!==null)ytdA.push(m.ytd); }
+  });
+
+  // Render visibility bar
+  renderVisBar();
+
+  // Render strategy cards — skip hidden ones
+  Object.entries(S).forEach(([id,strat])=>{
+    if(hiddenStrategies.has(id)) return; // hidden — skip card
+    const m=calcMetrics(id,today);
+    const cs=capitalSummary(id);
+    const isWM=strat.freq==='wm';
+    const cols=isWM?4:5;
+    const risks=[];
+    if(m){
+      if(m.sl&&m.pct<0){const sn=parseFloat(m.sl);if(!isNaN(sn)&&m.pct<sn*0.7)risks.push({cls:'danger',icon:'🔴',text:`Approaching stop loss. Period: ${fPct(m.pct)}, SL: ${m.sl}`,badge:'NEAR SL'});}
+      if(m.wtd!==null&&m.wtd<-strat.target.weekly*0.5)risks.push({cls:'warn',icon:'⚠️',text:`WTD ${fPct(m.wtd)} well below weekly target ${fPct(strat.target.weekly)}`,badge:'WATCH'});
+      if(m.wtd!==null&&m.wtd>=strat.target.weekly)risks.push({cls:'ok',icon:'✅',text:`Weekly target hit: ${fPct(m.wtd)} vs target ${fPct(strat.target.weekly)}`,badge:'ON TARGET'});
+      if(!risks.length)risks.push({cls:'ok',icon:'🟢',text:'Within normal parameters. No immediate risk flags.',badge:'OK'});
+    }
+    const prog=(a,t)=>!m||!a?0:Math.max(0,Math.min(100,(a/t)*100));
+    const barC=(a,t)=>!a?'var(--muted)':a>=t?'var(--pos)':a>=t*0.5?strat.color:a<0?'var(--neg)':'var(--warn)';
+    const dayCell=!isWM?`<div class="mcell"><div class="mlabel">Day</div><div class="mval ${m?cc(m.pct):'neu'}">${m?fPct(m.pct):'—'}</div><div class="mvs">tgt/day <span class="${m&&m.pct>=strat.target.weekly/5?'ahead':'behind'}">${fPct(strat.target.weekly/5)}</span></div></div>`:'';
+    const pW=prog(m?.wtd,strat.target.weekly),pM=prog(m?.mtd,strat.target.monthly),pY=prog(m?.ytd,strat.target.annual);
+    secEl.insertAdjacentHTML('beforeend',`
+    <div class="sec">
+      <div class="sec-hdr" onclick="toggleSec('${id}')">
+        <div class="sec-left">
+          <div class="dot" style="background:${strat.color}"></div>
+          <div><div class="sec-name">${strat.name}</div><div class="sec-plat">${strat.platform}</div></div>
+          ${isWM?'<span class="pill pill-green">WK/MO</span>':''}
+          <span class="pill" style="background:rgba(59,107,255,.15);color:#8aabff;font-size:10px;font-weight:600;">${ccySym(strat.baseCcy)}</span>
+          ${m?`<span class="pill pill-grey">AUM ${fUSD(m.currAUM)}</span>`:''}
+        </div>
+        <div class="sec-right">
+          <div style="text-align:right;">
+            <div class="sec-pnl-v ${m?cc(cs.totalPnL):'neu'}">${m?fUSD(cs.totalPnL):'No data'}</div>
+            <div class="sec-pnl-s">${m?fPct(m.itd)+' ITD':'Log first entry'}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button onclick="event.stopPropagation();toggleStratVisibility('${id}')"
+              style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:4px;
+                     padding:2px 8px;font-size:10px;font-family:'DM Mono',monospace;cursor:pointer;"
+              title="Hide from dashboard">hide</button>
+            <div class="chevron open" id="chev-${id}">▼</div>
+          </div>
+        </div>
+      </div>
+      <div class="sec-body" id="body-${id}">
+        <div class="mrow" style="grid-template-columns:repeat(${cols},1fr);">
+          ${dayCell}
+          <div class="mcell"><div class="mlabel">WTD ${m&&m.wtdInterp?'<span style="color:var(--interp);font-size:9px;">~est</span>':''}</div><div class="mval">${m&&m.wtd!==null?fPctI(m.wtd,m.wtdInterp):'—'}</div><div class="mvs">tgt <span class="${m&&m.wtd!==null&&m.wtd>=strat.target.weekly?'ahead':'behind'}">${fPct(strat.target.weekly)}</span></div></div>
+          <div class="mcell"><div class="mlabel">MTD ${m&&m.mtdInterp?'<span style="color:var(--interp);font-size:9px;">~est</span>':''}</div><div class="mval">${m&&m.mtd!==null?fPctI(m.mtd,m.mtdInterp):'—'}</div><div class="mvs">tgt <span class="${m&&m.mtd!==null&&m.mtd>=strat.target.monthly?'ahead':'behind'}">${fPct(strat.target.monthly)}</span></div></div>
+          <div class="mcell"><div class="mlabel">YTD ${m&&m.ytdInterp?'<span style="color:var(--interp);font-size:9px;">~est</span>':''}</div><div class="mval">${m&&m.ytd!==null?fPctI(m.ytd,m.ytdInterp):'—'}</div><div class="mvs">tgt <span class="${m&&m.ytd!==null&&m.ytd>=strat.target.annual?'ahead':'behind'}">${fPct(strat.target.annual)}</span></div></div>
+          <div class="mcell"><div class="mlabel">ITD ${m&&m.itdInterp?'<span style="color:var(--interp);font-size:9px;">~est</span>':''}</div><div class="mval">${m&&m.itd!==null?fPctI(m.itd,m.itdInterp):'—'}</div><div class="mvs" style="color:var(--muted)">inception</div></div>
+        </div>
+        <div class="tgt-sec">
+          ${['weekly','monthly','annual'].map(p=>{const a=m?m[p==='weekly'?'wtd':p==='monthly'?'mtd':'ytd']:0,t=strat.target[p],pg=prog(a,t),cl=barC(a,t);return`<div class="tgt-row"><div class="tgt-lbl">${p.slice(0,3).toUpperCase()}</div><div class="bar-wrap"><div class="bar" style="width:${pg}%;background:${cl}"></div></div><div class="tgt-pct" style="color:${cl}">${m?fPct(a):'—'}</div><div class="tgt-goal">/ ${fPct(t)}</div></div>`;}).join('')}
+        </div>
+        <div class="capital-strip">
+          <div class="cap-cell"><div class="cap-lbl">Inception AUM</div><div class="cap-val neu">${fUSD(cs.inceptAUM)}</div></div>
+          <div class="cap-cell"><div class="cap-lbl">Capital Added</div><div class="cap-val pos">${cs.totalIn>0?fUSD(cs.totalIn):'—'}</div></div>
+          <div class="cap-cell"><div class="cap-lbl">Capital Drawn</div><div class="cap-val neg">${cs.totalOut>0?'-'+fUSD(cs.totalOut):'—'}</div></div>
+          <div class="cap-cell"><div class="cap-lbl">Net P&amp;L (Trading)</div><div class="cap-val ${cc(cs.totalPnL)}">${fUSD(cs.totalPnL)}</div></div>
+        </div>
+        <div class="rpanel">
+          ${risks.map(r=>`<div class="rrow ${r.cls}"><span>${r.icon}</span><span class="rtext">${r.text}</span><span class="rbadge">${r.badge}</span></div>`).join('')}
+          ${m&&m.sl?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);padding:3px 2px;">🎯 SL: ${m.sl} &nbsp;|&nbsp; TP: ${m.tp||'Not set'} &nbsp;|&nbsp; Last: ${m.date}</div>`:''}
+        </div>
+      </div>
+    </div>`);
+  });
+
+  // Totals
+  document.getElementById('tAUM').textContent=fUSD(totalAUM);
+  const pEl=document.getElementById('tPnl'); pEl.textContent=fUSD(totalPnL); pEl.className='sval '+cc(totalPnL);
+  document.getElementById('tNet').textContent=fUSD(totalNet);
+  const wE=document.getElementById('tWTD'),avgW=wtdA.length?wtdA.reduce((a,b)=>a+b,0)/wtdA.length:null;
+  wE.textContent=avgW!==null?fPct(avgW):'—'; wE.className='sval '+(avgW!==null?cc(avgW):'neu');
+  const yE=document.getElementById('tYTD'),avgY=ytdA.length?ytdA.reduce((a,b)=>a+b,0)/ytdA.length:null;
+  yE.textContent=avgY!==null?fPct(avgY):'—'; yE.className='sval '+(avgY!==null?cc(avgY):'neu');
+}
+
+function toggleSec(id){
+  document.getElementById('body-'+id).classList.toggle('collapsed');
+  document.getElementById('chev-'+id).classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// RETURNS METRICS TAB
+// ═══════════════════════════════════════════════════════════════════════
+function switchRMTab(tab,el){
+  document.querySelectorAll('.rm-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.rm-section').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('rm-'+tab).classList.add('active');
+  renderRMSection(tab);
+}
+
+function renderRMSection(tab){
+  const today=todayStr();
+  if(tab==='itd')   renderPeriodMetrics('rm-itd-content',  null,today,'Inception to Date');
+  if(tab==='ytd')   renderPeriodMetrics('rm-ytd-content',  yrStart(today),today,'Year to Date');
+  if(tab==='mtd')   renderPeriodMetrics('rm-mtd-content',  moStart(today),today,'Month to Date');
+  if(tab==='years') renderByYear();
+  renderBenchmark();
+  renderVolatility();
+  renderRatios();
+}
+
+function renderPeriodMetrics(containerId, fromDate, toDate, label){
+  const el=document.getElementById(containerId);
+  if(!el) return;
+  let html=`<div style="font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;color:var(--muted);margin-bottom:12px;">${label}</div>`;
+  html+=`<div class="metric-grid wide">`;
+  visibleEntries().forEach(([id,strat])=>{
+    const es=stratEntries(id).filter(e=>(!fromDate||e.date>=fromDate)&&e.date<=toDate);
+    const first=fromDate?stratEntries(id).find(e=>e.date>=fromDate):getFirst(id);
+    const retObj=fromDate?compoundReturn(id,fromDate,toDate):compoundReturn(id,first?first.date:toDate,toDate);
+    const ret=retObj?retObj.val:null;
+    const cs=capitalSummary(id);
+    const pnlAbs=es.reduce((s,e)=>s+e.pnl,0);
+    html+=`<div class="mcard">
+      <div class="mcard-label" style="color:${strat.color}">● ${strat.name}</div>
+      <div class="mcard-val ${cc(ret||0)}">${fPct(ret)}</div>
+      <div class="mcard-sub">${fUSD(pnlAbs)} P&L</div>
+      <div class="mcard-sub" style="margin-top:2px;">${es.length} entries</div>
+    </div>`;
+  });
+  html+=`</div>`;
+  el.innerHTML=html;
+}
+
+function renderByYear(){
+  const el=document.getElementById('rm-years-content');
+  const allYears=[...new Set(DB.map(e=>e.date.slice(0,4)))].sort().reverse();
+  if(!allYears.length){el.innerHTML='<div style="color:var(--muted);padding:20px;text-align:center;">No data yet.</div>';return;}
+  let html='';
+  allYears.forEach(yr=>{
+    const from=`${yr}-01-01`, to=`${yr}-12-31`;
+    html+=`<div style="font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;color:var(--muted);margin-bottom:10px;margin-top:${yr!==allYears[0]?'18px':'0'}">${yr}</div>`;
+    html+=`<div class="metric-grid wide" style="margin-bottom:0;">`;
+    visibleEntries().forEach(([id,strat])=>{
+      const retObj2=compoundReturn(id,from,to);
+      const ret=retObj2?retObj2.val:null;
+      const pnl=stratEntries(id).filter(e=>e.date>=from&&e.date<=to).reduce((s,e)=>s+e.pnl,0);
+      html+=`<div class="mcard"><div class="mcard-label" style="color:${strat.color}">● ${strat.name}</div><div class="mcard-val ${cc(ret||0)}">${fPct(ret)}</div><div class="mcard-sub">${fUSD(pnl)}</div></div>`;
+    });
+    html+=`</div>`;
+  });
+  el.innerHTML=html;
+}
+
+function renderCustomRange(){
+  const from=document.getElementById('customFrom').value;
+  const to=document.getElementById('customTo').value;
+  if(!from||!to){alert('Please select both dates.');return;}
+  renderPeriodMetrics('rm-custom-content',from,to,`${fmtD(from)} → ${fmtD(to)}`);
+}
+
+function renderBenchmark(){
+  const el=document.getElementById('benchmarkContent');
+  const today=todayStr();
+  let html='';
+
+  // Column headers
+  html+=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;margin-bottom:10px;">
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:0 4px;">Period</div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:0 4px;">P&L (US$)</div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:0 4px;">Actual %</div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:0 4px;">Benchmark %</div>
+  </div>`;
+
+  visibleEntries().forEach(([id,strat])=>{
+    const m=calcMetrics(id,today);
+    if(!m) return;
+    const cs=capitalSummary(id);
+    const ccy=strat.baseCcy;
+    const tW=strat.target.weekly, tM=strat.target.monthly, tA=strat.target.annual;
+    const aW=m.wtd||0, aM=m.mtd||0, aY=m.ytd||0, aI=m.itd||0;
+
+    // Approximate period P&L in USD from % × current AUM
+    const pnlW = (aW/100) * cs.currAUM;
+    const pnlM = (aM/100) * cs.currAUM;
+    const pnlY = (aY/100) * cs.currAUM;
+    const pnlI = cs.totalPnL;
+
+    const row=(label,pnl,actual,bench,isInterp)=>`
+      <div style="padding:6px 4px;border-bottom:1px solid var(--border);">
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">${label}</span>
+      </div>
+      <div style="padding:6px 4px;border-bottom:1px solid var(--border);">
+        <span style="font-family:'DM Mono',monospace;font-size:13px;" class="${cc(pnl)}">${fUSD(pnl)}</span>
+      </div>
+      <div style="padding:6px 4px;border-bottom:1px solid var(--border);">
+        <span style="font-family:'DM Mono',monospace;font-size:13px;" class="${isInterp?'interp':cc(actual)}">${isInterp?'~':''}${fPct(actual)}</span>
+      </div>
+      <div style="padding:6px 4px;border-bottom:1px solid var(--border);">
+        <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--muted);">${fPct(bench)}</span>
+      </div>`;
+
+    html+=`<div style="margin-bottom:16px;">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:${strat.color};margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span>●</span><span>${strat.name}</span>
+        <span style="font-size:9px;color:var(--muted);">${ccySym(ccy)} → US$</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:var(--border);border-radius:7px;overflow:hidden;">
+        ${row('Weekly',  pnlW, aW, tW, m.wtdInterp)}
+        ${row('Monthly', pnlM, aM, tM, m.mtdInterp)}
+        ${row('Annual',  pnlY, aY, tA, m.ytdInterp)}
+        ${row('ITD',     pnlI, aI, tA, m.itdInterp)}
+      </div>
+    </div>`;
+  });
+  el.innerHTML=html||'<div style="color:var(--muted);padding:10px;">No data yet.</div>';
+}
+
+function renderVolatility(){
+  const el=document.getElementById('volContent');
+  let html='';
+  visibleEntries().forEach(([id,strat])=>{
+    const series=returnSeries(id).map(e=>e.pct);
+    if(series.length<2) return;
+    const rm=calcRiskMetrics(series);
+    if(!rm) return;
+    html+=`<div style="margin-bottom:14px;">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:${strat.color};margin-bottom:6px;">● ${strat.name}</div>
+      <div class="vol-grid">
+        <div class="mcard"><div class="mcard-label">Period Vol</div><div class="mcard-val neu">${f2(rm.dailyVol)}%</div><div class="mcard-sub">per period</div></div>
+        <div class="mcard"><div class="mcard-label">Weekly Vol</div><div class="mcard-val neu">${f2(rm.weeklyVol)}%</div></div>
+        <div class="mcard"><div class="mcard-label">Monthly Vol</div><div class="mcard-val neu">${f2(rm.monthlyVol)}%</div></div>
+        <div class="mcard"><div class="mcard-label">Annual Vol</div><div class="mcard-val neu">${f2(rm.annualVol)}%</div></div>
+      </div>
+    </div>`;
+  });
+  el.innerHTML=html||'<div style="color:var(--muted);padding:10px;">Need at least 2 entries per strategy.</div>';
+}
+
+function renderRatios(){
+  const el=document.getElementById('ratioContent');
+  let html='';
+  visibleEntries().forEach(([id,strat])=>{
+    const series=returnSeries(id).map(e=>e.pct);
+    if(series.length<2) return;
+    const rm=calcRiskMetrics(series);
+    if(!rm) return;
+    html+=`<div style="margin-bottom:14px;">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:${strat.color};margin-bottom:6px;">● ${strat.name}</div>
+      <div class="metric-grid wide">
+        <div class="mcard"><div class="mcard-label">Sharpe Ratio</div><div class="mcard-val ${cc(rm.sharpe)}">${f2(rm.sharpe)}</div><div class="mcard-sub">Ann. risk-free 5%</div></div>
+        <div class="mcard"><div class="mcard-label">Sortino Ratio</div><div class="mcard-val ${cc(rm.sortino)}">${f2(rm.sortino)}</div><div class="mcard-sub">Downside deviation</div></div>
+        <div class="mcard"><div class="mcard-label">Max Drawdown</div><div class="mcard-val neg">${fPct(rm.maxDD)}</div></div>
+        <div class="mcard"><div class="mcard-label">Calmar Ratio</div><div class="mcard-val ${cc(rm.calmar)}">${f2(rm.calmar)}</div></div>
+        <div class="mcard"><div class="mcard-label">Win Rate</div><div class="mcard-val neu">${f2(rm.wr)}%</div><div class="mcard-sub">${rm.wins}/${rm.n} periods</div></div>
+        <div class="mcard"><div class="mcard-label">Best Period</div><div class="mcard-val pos">${fPct(rm.best)}</div></div>
+        <div class="mcard"><div class="mcard-label">Worst Period</div><div class="mcard-val neg">${fPct(rm.worst)}</div></div>
+        <div class="mcard"><div class="mcard-label">Avg Period</div><div class="mcard-val ${cc(rm.mean)}">${fPct(rm.mean)}</div></div>
+      </div>
+    </div>`;
+  });
+  el.innerHTML=html||'<div style="color:var(--muted);padding:10px;">Need at least 2 entries per strategy.</div>';
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// EXPORT TO CSV (open in Google Sheets)
+// ═══════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
+// EXPORT TO MULTI-WORKSHEET XLSX
+// Each visible strategy → its own worksheet
+// Plus one SUMMARY worksheet that totals across all strategies
+// Plus optional INVESTMENTS worksheet if any property/pension/insurance
+// Opens cleanly in Google Sheets, Excel, and Apple Numbers
+// ═══════════════════════════════════════════════════════════════════════
+function exportToCSV(){ exportToXLSX(); } // alias preserved for old buttons
+
+function exportToXLSX(){
+  if(typeof XLSX === 'undefined'){
+    alert('Excel library still loading — please try again in a moment.');
+    return;
+  }
+
+  const visStrats = visibleEntries(); // [[id, strat], ...]
+  if(!visStrats.length){
+    alert('No visible strategies to export.');
+    return;
+  }
+
+  const wb = XLSX.utils.book_new();
+  const today = todayStr();
+
+  // ── Helper: safe sheet name (Excel: max 31 chars, no : \ / ? * [ ]) ──
+  function safeSheetName(name) {
+    return name.replace(/[\\/?*\[\]:]/g, '').substring(0, 31);
+  }
+
+  // ── Per-strategy worksheets ──
+  visStrats.forEach(([id, strat]) => {
+    const series  = getFullSeries(id); // includes interpolated points
+    const realSet = new Set(stratReal(id).map(e => e.date));
+    const ccy     = strat.baseCcy;
+    const sym     = ccySym(ccy);
+
+    const aoa = [];
+
+    // Title row
+    aoa.push([strat.name.toUpperCase()]);
+    aoa.push([`${strat.platform || ''}  ·  ${strat.country || ''}  ·  Base: ${ccy}  ·  Export: ${today}`]);
+    aoa.push([]);
+
+    // Headers
+    aoa.push([
+      'Date', 'Type', 'Real/Interp',
+      `Inception AUM (${ccy})`, `Current AUM (${ccy})`,
+      `Cash In (${ccy})`, `Cash Out (${ccy})`,
+      `Adj AUM (${ccy})`,
+      `Period P&L (${ccy})`, `Period P&L (US$)`,
+      'Period %', 'WTD %', 'MTD %', 'YTD %', 'ITD %',
+      'SL', 'TP', 'Notes'
+    ]);
+
+    // Data rows
+    series.forEach(e => {
+      const m = calcMetrics(id, e.date);
+      const eCcy = stratCcyAtDate(id, e.date);
+      const pnlUSD = toUSD(e.pnl || 0, eCcy);
+      const isReal = realSet.has(e.date) && !e.isInterp;
+      aoa.push([
+        e.date,
+        e.entryType || '',
+        isReal ? 'Real' : '~ Interp',
+        Number(e.inceptAUM) || 0,
+        Number(e.currAUM)   || 0,
+        Number(e.cashIn)    || 0,
+        Number(e.cashOut)   || 0,
+        Number(e.adjAUM || e.currAUM) || 0,
+        Number(e.pnl)       || 0,
+        Number(pnlUSD.toFixed(2)),
+        Number((e.pct || 0).toFixed(4)) / 100, // store as decimal for % format
+        m && m.wtd !== null ? Number(m.wtd.toFixed(4))/100 : '',
+        m && m.mtd !== null ? Number(m.mtd.toFixed(4))/100 : '',
+        m && m.ytd !== null ? Number(m.ytd.toFixed(4))/100 : '',
+        m && m.itd !== null ? Number(m.itd.toFixed(4))/100 : '',
+        e.sl || '', e.tp || '',
+        e.notes || ''
+      ]);
+    });
+
+    // Blank + strategy summary at bottom
+    const cs = capitalSummary(id);
+    const m  = calcMetrics(id, today);
+    const rm = calcRiskMetrics(returnSeries(id).map(x => x.pct));
+    aoa.push([]);
+    aoa.push(['STRATEGY SUMMARY']);
+    aoa.push(['Inception AUM (US$)',   Number(cs.inceptAUM.toFixed(2))]);
+    aoa.push(['Current AUM (US$)',     Number(cs.currAUM.toFixed(2))]);
+    aoa.push(['Capital Added (US$)',   Number(cs.totalIn.toFixed(2))]);
+    aoa.push(['Capital Withdrawn (US$)',Number(cs.totalOut.toFixed(2))]);
+    aoa.push(['Net Invested (US$)',    Number(cs.netInvested.toFixed(2))]);
+    aoa.push(['Total Trading P&L (US$)',Number(cs.totalPnL.toFixed(2))]);
+    aoa.push([]);
+    aoa.push(['ITD Return %',  m && m.itd !== null ? Number(m.itd.toFixed(4))/100 : '']);
+    aoa.push(['YTD Return %',  m && m.ytd !== null ? Number(m.ytd.toFixed(4))/100 : '']);
+    aoa.push(['MTD Return %',  m && m.mtd !== null ? Number(m.mtd.toFixed(4))/100 : '']);
+    aoa.push(['WTD Return %',  m && m.wtd !== null ? Number(m.wtd.toFixed(4))/100 : '']);
+    aoa.push([]);
+    aoa.push(['Target Weekly %',   Number(strat.target.weekly.toFixed(4))/100]);
+    aoa.push(['Target Monthly %',  Number(strat.target.monthly.toFixed(4))/100]);
+    aoa.push(['Target Annual %',   Number(strat.target.annual.toFixed(4))/100]);
+    if(rm){
+      aoa.push([]);
+      aoa.push(['RISK METRICS']);
+      aoa.push(['Sharpe Ratio',    Number(rm.sharpe.toFixed(4))]);
+      aoa.push(['Sortino Ratio',   Number(rm.sortino.toFixed(4))]);
+      aoa.push(['Max Drawdown %',  Number(rm.maxDD.toFixed(4))/100]);
+      aoa.push(['Calmar Ratio',    Number(rm.calmar.toFixed(4))]);
+      aoa.push(['Win Rate %',      Number(rm.wr.toFixed(2))/100]);
+      aoa.push(['Annual Volatility %', Number(rm.annualVol.toFixed(4))/100]);
+      aoa.push(['Best Period %',   Number(rm.best.toFixed(4))/100]);
+      aoa.push(['Worst Period %',  Number(rm.worst.toFixed(4))/100]);
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+    // Column widths
+    ws['!cols'] = [
+      {wch:12},{wch:14},{wch:11},{wch:18},{wch:18},
+      {wch:15},{wch:15},{wch:18},{wch:18},{wch:18},
+      {wch:11},{wch:10},{wch:10},{wch:10},{wch:10},
+      {wch:10},{wch:10},{wch:32}
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, safeSheetName(strat.name));
+  });
+
+  // ── INVESTMENTS sheet (if any) ──
+  if(typeof INVESTMENTS !== 'undefined' && INVESTMENTS.length){
+    const invAOA = [];
+    invAOA.push(['INVESTMENTS — PROPERTY, PENSION, INSURANCE']);
+    invAOA.push([`Export: ${today}`]);
+    invAOA.push([]);
+    invAOA.push(['Type','Name','Country','Currency','Key Value (Native)','Key Value (US$)','Notes']);
+
+    INVESTMENTS.forEach(inv => {
+      let keyVal = 0, keyValUSD = 0;
+      if(inv.type === 'property'){
+        keyVal    = inv.netEquity    || 0;
+        keyValUSD = inv.netEquityUSD || 0;
+      } else if(inv.type === 'pension'){
+        keyVal    = inv.value    || 0;
+        keyValUSD = inv.valueUSD || 0;
+      } else if(inv.type === 'insurance'){
+        keyVal    = inv.cashValue || 0;
+        keyValUSD = inv.valueUSD  || 0;
+      }
+      invAOA.push([
+        inv.type.toUpperCase(),
+        inv.name || '',
+        inv.country || '',
+        inv.ccy || '',
+        Number(keyVal),
+        Number(keyValUSD.toFixed(2)),
+        inv.notes || ''
+      ]);
+    });
+
+    const invWS = XLSX.utils.aoa_to_sheet(invAOA);
+    invWS['!cols'] = [{wch:12},{wch:32},{wch:18},{wch:10},{wch:20},{wch:18},{wch:32}];
+    XLSX.utils.book_append_sheet(wb, invWS, 'Investments');
+  }
+
+  // ── SUMMARY worksheet (totals across all visible strategies) ──
+  const sumAOA = [];
+  sumAOA.push(['WIZ PORTFOLIO SUMMARY']);
+  sumAOA.push([`Export: ${today}  ·  Reporting Currency: US$`]);
+  sumAOA.push([]);
+
+  // Headers
+  sumAOA.push([
+    'Strategy', 'Country', 'Base CCY',
+    'Inception AUM (US$)', 'Current AUM (US$)',
+    'Capital Added (US$)', 'Capital Drawn (US$)',
+    'Net Invested (US$)', 'Total P&L (US$)',
+    'WTD %', 'MTD %', 'YTD %', 'ITD %',
+    'Sharpe', 'Sortino', 'Max DD %', 'Win Rate %'
+  ]);
+
+  // One row per strategy
+  let dataStartRow = sumAOA.length + 1; // 1-indexed Excel row for SUM formulas
+  visStrats.forEach(([id, strat]) => {
+    const cs = capitalSummary(id);
+    const m  = calcMetrics(id, today);
+    const rm = calcRiskMetrics(returnSeries(id).map(x => x.pct));
+    sumAOA.push([
+      strat.name,
+      strat.country || '',
+      strat.baseCcy,
+      Number(cs.inceptAUM.toFixed(2)),
+      Number(cs.currAUM.toFixed(2)),
+      Number(cs.totalIn.toFixed(2)),
+      Number(cs.totalOut.toFixed(2)),
+      Number(cs.netInvested.toFixed(2)),
+      Number(cs.totalPnL.toFixed(2)),
+      m && m.wtd !== null ? Number(m.wtd.toFixed(4))/100 : '',
+      m && m.mtd !== null ? Number(m.mtd.toFixed(4))/100 : '',
+      m && m.ytd !== null ? Number(m.ytd.toFixed(4))/100 : '',
+      m && m.itd !== null ? Number(m.itd.toFixed(4))/100 : '',
+      rm ? Number(rm.sharpe.toFixed(4))  : '',
+      rm ? Number(rm.sortino.toFixed(4)) : '',
+      rm ? Number(rm.maxDD.toFixed(4))/100 : '',
+      rm ? Number(rm.wr.toFixed(2))/100  : '',
+    ]);
+  });
+
+  // TOTAL row with SUM formulas
+  const dataEndRow = sumAOA.length;
+  const totalRow = ['TOTAL', '', ''];
+  // Numeric sum columns: D through I (cols 4-9 in 1-indexed = 'D' to 'I')
+  const sumCols = ['D','E','F','G','H','I'];
+  sumCols.forEach(c => {
+    totalRow.push({ f: `SUM(${c}${dataStartRow}:${c}${dataEndRow})` });
+  });
+  // For %, Sharpe, etc — leave blank (no sensible aggregate)
+  for(let i=0;i<8;i++) totalRow.push('');
+  sumAOA.push(totalRow);
+
+  sumAOA.push([]);
+
+  // Investments breakdown
+  if(typeof INVESTMENTS !== 'undefined' && INVESTMENTS.length){
+    const propTot = INVESTMENTS.filter(i=>i.type==='property') .reduce((s,i)=>s+(i.netEquityUSD||0),0);
+    const pensTot = INVESTMENTS.filter(i=>i.type==='pension')  .reduce((s,i)=>s+(i.valueUSD||0),0);
+    const insTot  = INVESTMENTS.filter(i=>i.type==='insurance').reduce((s,i)=>s+(i.valueUSD||0),0);
+
+    sumAOA.push(['INVESTMENTS BREAKDOWN (US$)']);
+    sumAOA.push(['Property (Net Equity)', '', '', '', Number(propTot.toFixed(2))]);
+    sumAOA.push(['Pension Funds',          '', '', '', Number(pensTot.toFixed(2))]);
+    sumAOA.push(['Insurance (Cash Value)', '', '', '', Number(insTot.toFixed(2))]);
+    sumAOA.push([]);
+  }
+
+  // FX rates used
+  sumAOA.push(['FX RATES USED']);
+  const ccysUsed = [...new Set(visStrats.map(([, s]) => s.baseCcy))];
+  ccysUsed.forEach(c => {
+    if(c !== 'USD') sumAOA.push([`${ccySym(c)} / US$`, '', '', '', Number(toUSDRate(c).toFixed(4))]);
+  });
+  sumAOA.push([]);
+
+  // Notes
+  sumAOA.push(['NOTES']);
+  sumAOA.push(['Filter applied:', hiddenStrategies.size > 0
+    ? `Showing ${visStrats.length} of ${Object.keys(S).length} strategies (${hiddenStrategies.size} hidden)`
+    : 'All strategies shown']);
+  sumAOA.push(['Interpolated points:', 'Daily series includes straight-line estimates where real entries were not logged']);
+
+  const sumWS = XLSX.utils.aoa_to_sheet(sumAOA);
+  sumWS['!cols'] = [
+    {wch:24},{wch:14},{wch:10},{wch:20},{wch:20},
+    {wch:18},{wch:18},{wch:18},{wch:18},
+    {wch:10},{wch:10},{wch:10},{wch:10},
+    {wch:10},{wch:10},{wch:10},{wch:11}
+  ];
+
+  // Insert Summary as the FIRST sheet (Excel convention)
+  XLSX.utils.book_append_sheet(wb, sumWS, 'Summary');
+  // Reorder: move Summary to position 0
+  const lastIdx = wb.SheetNames.length - 1;
+  if(lastIdx > 0){
+    const summaryName = wb.SheetNames.pop();
+    wb.SheetNames.unshift(summaryName);
+  }
+
+  // Write file
+  const filename = `wiz_portfolio_${today}.xlsx`;
+  XLSX.writeFile(wb, filename);
+
+  // Show a tip
+  setTimeout(() => {
+    alert(
+      '✅ Excel file downloaded: ' + filename + '\n\n' +
+      'Contents:\n' +
+      '  • Summary sheet (totals across all strategies)\n' +
+      '  • One sheet per visible strategy\n' +
+      (INVESTMENTS && INVESTMENTS.length ? '  • Investments sheet\n' : '') +
+      '\nOpens in:\n' +
+      '  • Excel — double-click\n' +
+      '  • Google Sheets — File → Import → Upload\n' +
+      '  • Apple Numbers — double-click'
+    );
+  }, 300);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// HISTORY LOG
+// ═══════════════════════════════════════════════════════════════════════
+function renderLog(){
+  // Combine real + interpolated entries for VISIBLE strategies only
+  const allEntries = visibleIds().flatMap(id => getFullSeries(id));
+  const sorted = allEntries.sort((a,b)=>b.date.localeCompare(a.date));
+  const body=document.getElementById('logBody');
+  if(!sorted.length){body.innerHTML='<tr><td colspan="17" style="text-align:center;color:var(--muted);padding:22px;">No entries yet.</td></tr>';return;}
+  body.innerHTML=sorted.map(e=>{
+    const m=calcMetrics(e.strategy,e.date);
+    const strat=S[e.strategy];
+    const cs=capitalSummary(e.strategy);
+    const rowCls = e.isInterp ? 'interp-row' : 'real-row';
+    const dateDot = e.isInterp
+      ? '<span class="interp-dot"></span>'
+      : '<span class="real-dot"></span>';
+    return`<tr class="${rowCls}">
+      <td>${dateDot}${e.date}</td>
+      <td style="color:${strat.color};font-weight:600">${strat.name.split(' ')[0]}</td>
+      <td style="color:${e.isInterp?'var(--interp)':'var(--muted)'}">${e.isInterp?'~interp':e.entryType||''}</td>
+      <td>${fUSD(entryToUSD(e).inceptAUM_usd)}<br><span style="font-size:9px;color:var(--muted)">${ccySym(stratCcyAtDate(e.strategy,e.date))}${fUSD(e.inceptAUM)}</span></td>
+      <td>${fUSD(entryToUSD(e).currAUM_usd)}<br><span style="font-size:9px;color:var(--muted)">${ccySym(stratCcyAtDate(e.strategy,e.date))}${fUSD(e.currAUM)}</span></td>
+      <td class="pos">${e.cashIn?fUSD(entryToUSD(e).cashIn_usd):'—'}</td>
+      <td class="neg">${e.cashOut?'-'+fUSD(entryToUSD(e).cashOut_usd):'—'}</td>
+      <td>${fUSD(entryToUSD(e).adjAUM_usd)}</td>
+      <td class="${cc(e.pnl)}">${fUSD(entryToUSD(e).pnl_usd)}<br><span style="font-size:9px;color:var(--muted)">${ccySym(stratCcyAtDate(e.strategy,e.date))}${fUSD(e.pnl)}</span></td>
+      <td class="${e.isInterp?'interp':cc(e.pct)}">${fPct(e.pct)}</td>
+      <td>${m&&m.wtd!==null?fPctI(m.wtd,m.wtdInterp):'—'}</td>
+      <td>${m&&m.mtd!==null?fPctI(m.mtd,m.mtdInterp):'—'}</td>
+      <td>${m&&m.ytd!==null?fPctI(m.ytd,m.ytdInterp):'—'}</td>
+      <td>${m&&m.itd!==null?fPctI(m.itd,m.itdInterp):'—'}</td>
+      <td style="color:var(--muted)">${e.sl||'—'}</td><td style="color:var(--muted)">${e.tp||'—'}</td>
+      <td style="color:${e.isInterp?'var(--interp)':'var(--muted)'};max-width:140px;overflow:hidden;text-overflow:ellipsis">${e.notes||''}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// CHARTS — compact on iPhone, tap to fullscreen
+// ═══════════════════════════════════════════════════════════════════════
+
+const CHART_STORE = {};
+
+function openChartFS(key) {
+  const d = CHART_STORE[key];
+  if(!d) return;
+  const overlay = document.getElementById('chartFSOverlay');
+  document.getElementById('chartFSTitle').textContent = d.title;
+  overlay.classList.add('open');
+  requestAnimationFrame(() => {
+    const cv = document.getElementById('chartFSCanvas');
+    const W  = window.innerWidth  - 32;
+    const H  = window.innerHeight - 110;
+    cv.style.width  = W + 'px';
+    cv.style.height = H + 'px';
+    if(d.type === 'line') drawLineChart('chartFSCanvas', d.labels, d.datasets, d.unit, W, H);
+    else                  drawGroupedBar('chartFSCanvas', d.labels, d.datasets, W, H);
+  });
+}
+
+function closeChartFS() {
+  document.getElementById('chartFSOverlay').classList.remove('open');
+}
+
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeChartFS(); });
+
+function renderAnalytics(){
+  const stratIds = visibleIds();
+
+  // FX display
+  const fxEl = document.getElementById('fxRatesDisplay');
+  if(fxEl){
+    const ccys = [...new Set(stratIds.map(id=>S[id].baseCcy))].filter(c=>c!=='USD');
+    fxEl.innerHTML = FX_DISPLAY_PAIRS.map(([b,q])=>{
+      const r = fxRate(b,q);
+      const rStr = (q==='INR'||b==='INR') ? r.toFixed(2) : r.toFixed(4);
+      return '<span style="white-space:nowrap;">' + ccySym(b)+'/'+ccySym(q)+' <strong style="color:var(--accent)">'+rStr+'</strong></span>';
+    }).join(' &nbsp;·&nbsp; ');
+  }
+
+  // ── 1. Combined % return chart ──
+  const allDates = [...new Set(
+    stratIds.flatMap(id => getFullSeries(id).map(e=>e.date))
+  )].sort();
+
+  const pctDatasets = stratIds.map(id => {
+    const full = getFullSeries(id);
+    const byDate = {};
+    full.forEach(e => byDate[e.date] = e);
+    let lastCum = 1;
+    const data = allDates.map(d => {
+      const e = byDate[d];
+      if(e) lastCum = lastCum * (1 + e.pct/100);
+      return (lastCum - 1) * 100;
+    });
+    return {label: S[id].name.split(' ')[0], data, color: S[id].color};
+  });
+
+  CHART_STORE['cumPct'] = {type:'line', title:'CUMULATIVE % RETURN — ALL STRATEGIES',
+    labels:allDates, datasets:pctDatasets, unit:'%'};
+
+  // ── 2. Separate US$ P&L per strategy — build all HTML first, draw after ──
+  const container = document.getElementById('stratChartsContainer');
+  container.innerHTML = '';
+
+  const pendingDraws = [];
+
+  stratIds.forEach(id => {
+    const strat = S[id];
+    const full  = getFullSeries(id);
+    if(!full.length) return;
+    const dates = full.map(e => e.date);
+    let cumUSD = 0;
+    const cumData = full.map(e => {
+      cumUSD += toUSD(e.pnl, stratCcyAtDate(id, e.date));
+      return cumUSD;
+    });
+    const ds  = [{label: strat.name.split(' ')[0]+' (US$)', data:cumData, color:strat.color}];
+    const key = 'strat_'+id;
+    CHART_STORE[key] = {type:'line',
+      title: strat.name.toUpperCase() + ' — CUMULATIVE P&L (US$)',
+      labels:dates, datasets:ds, unit:'$'};
+
+    const canvasId = 'chartc_'+id;
+    const ccyLabel = ccySym(strat.baseCcy) + ' → US$ @ ' + toUSDRate(strat.baseCcy).toFixed(4);
+    container.insertAdjacentHTML('beforeend',
+      '<div class="chart-card" onclick="openChartFS(\'' + key + '\')">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+      '<div class="chart-title" style="margin-bottom:0;color:' + strat.color + ';">' +
+      '\u25A0 ' + strat.name.toUpperCase() + '</div>' +
+      '<div style="display:flex;align-items:center;gap:8px;">' +
+      '<span style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted);">' + ccyLabel + '</span>' +
+      '<span style="font-size:11px;color:var(--muted);">\u2922</span>' +
+      '</div></div>' +
+      '<canvas id="' + canvasId + '" height="90"></canvas>' +
+      '<div class="chart-tap-hint">TAP TO EXPAND</div>' +
+      '</div>');
+
+    pendingDraws.push({canvasId, dates, ds});
+  });
+
+  // ── Draw all after DOM is ready ──
+  requestAnimationFrame(() => {
+    drawLineChart('cumPctChart', allDates, pctDatasets, '%');
+    pendingDraws.forEach(function(p){ drawLineChart(p.canvasId, p.dates, p.ds, '$'); });
+  });
+
+  // ── 3. Capital movements ──
+  const cashEntries = DB.filter(e=>(e.cashIn||0)+(e.cashOut||0)>0);
+  const cashDates   = [...new Set(cashEntries.map(e=>e.date))].sort();
+  if(cashDates.length){
+    const ins  = cashDates.map(d=>cashEntries.filter(e=>e.date===d)
+      .reduce((s,e)=>s+toUSD(e.cashIn||0, stratCcyAtDate(e.strategy,d)),0));
+    const outs = cashDates.map(d=>cashEntries.filter(e=>e.date===d)
+      .reduce((s,e)=>s+toUSD(e.cashOut||0, stratCcyAtDate(e.strategy,d)),0));
+    const cashDS = [{label:'Added',data:ins,color:'#10b981'},
+                    {label:'Drawn',data:outs.map(x=>-x),color:'#ef4444'}];
+    CHART_STORE['cash'] = {type:'bar', title:'CAPITAL MOVEMENTS (US$)',
+      labels:cashDates, datasets:cashDS};
+    requestAnimationFrame(function(){ drawGroupedBar('cashChart', cashDates, cashDS); });
+  } else {
+    CHART_STORE['cash'] = null;
+    const cv = document.getElementById('cashChart');
+    if(cv){
+      const W=cv.offsetWidth||320, H=90;
+      cv.width=W*devicePixelRatio; cv.height=H*devicePixelRatio;
+      const ctx=cv.getContext('2d'); ctx.scale(devicePixelRatio,devicePixelRatio);
+      ctx.fillStyle='#5a6278'; ctx.font='12px DM Mono'; ctx.textAlign='center';
+      ctx.fillText('No capital movements yet', W/2, H/2);
+    }
+  }
+}
+
+
+
+function drawLineChart(id,labels,datasets,unit,overW,overH){
+  const cv=document.getElementById(id);if(!cv)return;
+  const W=overW||(cv.offsetWidth||320), H=overH||(parseInt(cv.getAttribute('height'))||130);
+  cv.width=W*devicePixelRatio;cv.height=H*devicePixelRatio;
+  const ctx=cv.getContext('2d');ctx.scale(devicePixelRatio,devicePixelRatio);
+  ctx.clearRect(0,0,W,H);
+  const p={t:20,r:16,b:26,l:58};
+  const allV=datasets.flatMap(d=>d.data.filter(v=>v!==null));
+  if(!allV.length){ctx.fillStyle='#5a6278';ctx.font='12px DM Mono';ctx.textAlign='center';ctx.fillText('No data yet',W/2,H/2);return;}
+  const minV=Math.min(...allV),maxV=Math.max(...allV),range=maxV-minV||1;
+  const xS=i=>p.l+(i/Math.max(labels.length-1,1))*(W-p.l-p.r);
+  const yS=v=>p.t+(1-(v-minV)/range)*(H-p.t-p.b);
+  for(let i=0;i<=4;i++){const y=p.t+(i/4)*(H-p.t-p.b);ctx.strokeStyle='#1e2330';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(W-p.r,y);ctx.stroke();const v=maxV-(i/4)*range;ctx.fillStyle='#5a6278';ctx.font='10px DM Mono';ctx.textAlign='right';
+    const lbl=(unit==='%')?(v.toFixed(1)+'%'):(v>=1e6?(v/1e6).toFixed(1)+'M':v>=1000?(v/1000).toFixed(0)+'K':v.toFixed(0));
+    ctx.fillText(lbl,p.l-4,y+4);}
+  if(minV<0&&maxV>0){ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=1;ctx.setLineDash([4,4]);const zy=yS(0);ctx.beginPath();ctx.moveTo(p.l,zy);ctx.lineTo(W-p.r,zy);ctx.stroke();ctx.setLineDash([]);}
+  datasets.forEach(ds=>{ctx.beginPath();let st=false;ds.data.forEach((v,i)=>{if(v===null)return;st?ctx.lineTo(xS(i),yS(v)):(ctx.moveTo(xS(i),yS(v)),st=true);});ctx.strokeStyle=ds.color;ctx.lineWidth=2;ctx.stroke();});
+  ctx.fillStyle='#5a6278';ctx.font='10px DM Mono';ctx.textAlign='center';const step=Math.ceil(labels.length/6);labels.forEach((l,i)=>{if(i%step===0)ctx.fillText(l.slice(5),xS(i),H-6);});
+  datasets.forEach((ds,i)=>{ctx.fillStyle=ds.color;ctx.fillRect(p.l+i*90,4,8,8);ctx.fillStyle='#8090a8';ctx.font='10px DM Mono';ctx.textAlign='left';ctx.fillText(ds.label,p.l+i*90+11,12);});
+}
+
+function drawGroupedBar(id,labels,datasets,overW,overH){
+  const cv=document.getElementById(id);if(!cv)return;
+  const W=overW||(cv.offsetWidth||320), H=overH||(parseInt(cv.getAttribute('height'))||110);
+  cv.width=W*devicePixelRatio;cv.height=H*devicePixelRatio;
+  const ctx=cv.getContext('2d');ctx.scale(devicePixelRatio,devicePixelRatio);
+  ctx.clearRect(0,0,W,H);
+  const p={t:16,r:16,b:26,l:52};
+  const allV=datasets.flatMap(d=>d.data);
+  if(!allV.length){ctx.fillStyle='#5a6278';ctx.font='12px DM Mono';ctx.textAlign='center';ctx.fillText('No data yet',W/2,H/2);return;}
+  const minV=Math.min(...allV,0),maxV=Math.max(...allV,0),range=maxV-minV||1;
+  const yS=v=>p.t+(1-(v-minV)/range)*(H-p.t-p.b);
+  const zeroY=yS(0);
+  const groupW=(W-p.l-p.r)/labels.length;
+  const barW=Math.max(4,groupW/datasets.length-3);
+  for(let i=0;i<=4;i++){const y=p.t+(i/4)*(H-p.t-p.b);ctx.strokeStyle='#1e2330';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(W-p.r,y);ctx.stroke();ctx.fillStyle='#5a6278';ctx.font='10px DM Mono';ctx.textAlign='right';ctx.fillText((maxV-(i/4)*range).toFixed(1),p.l-4,y+4);}
+  labels.forEach((lbl,i)=>{datasets.forEach((ds,j)=>{const v=ds.data[i];const x=p.l+i*groupW+j*(barW+3)+5;const bh=Math.abs(yS(v)-zeroY);ctx.fillStyle=ds.color;ctx.fillRect(x,v>=0?zeroY-bh:zeroY,barW,bh);});ctx.fillStyle='#5a6278';ctx.font='9px DM Mono';ctx.textAlign='center';ctx.fillText(typeof lbl==='string'&&lbl.length>8?lbl.slice(5):lbl,p.l+i*groupW+groupW/2,H-6);});
+  datasets.forEach((ds,i)=>{ctx.fillStyle=ds.color;ctx.fillRect(p.l+i*80,4,8,8);ctx.fillStyle='#8090a8';ctx.font='10px DM Mono';ctx.textAlign='left';ctx.fillText(ds.label,p.l+i*80+11,12);});
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// MODAL — LOG ENTRY
+// ═══════════════════════════════════════════════════════════════════════
+function olClick(e,id){if(e.target===document.getElementById(id))closeModal(id);}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+function openLogModal(prefill){
+  resetForm();
+  document.getElementById('fDate').value=todayStr();
+  if(prefill)document.getElementById('fStrat').value=prefill;
+  onStratChange();
+  document.getElementById('logOverlay').classList.add('open');
+}
+
+function resetForm(){
+  ['fInceptAUM','fCurrAUM','fCashIn','fCashOut','fSL','fTP','fNotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('calcPreview').style.display='none';
+}
+
+function onStratChange(){
+  const id=document.getElementById('fStrat').value;
+  const strat=S[id];
+  const isWM=strat.freq==='wm';
+  document.getElementById('entryTypeBadge').textContent=isWM?'WEEKLY / MONTH-END SNAPSHOT':'DAILY ENTRY';
+  document.getElementById('entryTypeInfo').textContent=isWM?'Enter AUM as of any Friday (weekly) or month-end. Past dates are fine.':'Log AUM daily. Any past date accepted.';
+  document.getElementById('dailyFieldsWrap').style.display=isWM?'none':'block';
+  const existing=getInceptAUM(id);
+  const note=document.getElementById('inceptNote');
+  if(existing){document.getElementById('fInceptAUM').value=existing;note.textContent=`✓ Inception AUM on record: ${fUSD(existing)}`;note.className='finfo';}
+  else{document.getElementById('fInceptAUM').value='';note.textContent='First entry — set your starting capital. Locked as inception AUM.';note.className='finfo warn';}
+  onDateChange();
+}
+
+function onDateChange(){
+  const id=document.getElementById('fStrat').value;
+  const date=document.getElementById('fDate').value;
+  if(!date) return;
+  const d=new Date(date);
+  const isWM=S[id].freq==='wm';
+  const nd=new Date(d);nd.setDate(d.getDate()+1);
+  const isME=nd.getMonth()!==d.getMonth();
+  let typeLabel=isWM?(isME?'Month-end snapshot':'Weekly snapshot'):`Daily — ${d.toLocaleDateString('en-GB',{weekday:'long'})}`;
+  if(date<todayStr()) typeLabel='⏮ '+typeLabel+' (backdated)';
+  document.getElementById('periodLabel').textContent=typeLabel;
+  onInputChange();
+}
+
+function onInputChange(){
+  const id=document.getElementById('fStrat').value;
+  const strat=S[id];
+  const iAUM=parseFloat(document.getElementById('fInceptAUM').value);
+  const cAUM=parseFloat(document.getElementById('fCurrAUM').value);
+  const cashIn=parseFloat(document.getElementById('fCashIn').value)||0;
+  const cashOut=parseFloat(document.getElementById('fCashOut').value)||0;
+  const date=document.getElementById('fDate').value;
+  if(!date||isNaN(iAUM)||isNaN(cAUM)) { document.getElementById('calcPreview').style.display='none'; return; }
+
+  // Find previous entry before this date
+  const prevEntries=stratEntries(id).filter(e=>e.date<date);
+  const prev=prevEntries.length?prevEntries[prevEntries.length-1]:null;
+  const prevAUM=prev?prev.adjAUM||prev.currAUM:iAUM;
+
+  // Adjust for capital flows: deduct cashOut and add cashIn from the "base" AUM
+  const adjPrevAUM=prevAUM+cashIn-cashOut;
+  const adjCurrAUM=cAUM; // current is already what it is
+  const pnl=adjCurrAUM-adjPrevAUM;
+  const pct=adjPrevAUM>0?(pnl/adjPrevAUM)*100:0;
+  const itd=iAUM>0?((cAUM-iAUM)/iAUM)*100:0;
+
+  document.getElementById('pvPrev').textContent=fUSD(prevAUM);
+  document.getElementById('pvAdj').textContent=cashIn||cashOut?fUSD(adjPrevAUM)+` (±${fUSD(cashIn-cashOut)})`:fUSD(prevAUM);
+  document.getElementById('pvPnl').textContent=fUSD(pnl);document.getElementById('pvPnl').className=cc(pnl);
+  document.getElementById('pvPct').textContent=fPct(pct);document.getElementById('pvPct').className=cc(pct);
+  document.getElementById('pvITD').textContent=fPct(itd);document.getElementById('pvITD').className=cc(itd);
+  document.getElementById('pvWtgt').textContent=`${fPct(pct)} vs target ${fPct(strat.target.weekly)}`;
+  document.getElementById('pvWtgt').className=pct>=strat.target.weekly?'ahead':'behind';
+  document.getElementById('calcPreview').style.display='block';
+}
+
+function submitEntry(){
+  const stratId=document.getElementById('fStrat').value;
+  const date=document.getElementById('fDate').value;
+  const iAUM=parseFloat(document.getElementById('fInceptAUM').value);
+  const cAUM=parseFloat(document.getElementById('fCurrAUM').value);
+  const cashIn=parseFloat(document.getElementById('fCashIn').value)||0;
+  const cashOut=parseFloat(document.getElementById('fCashOut').value)||0;
+  const sl=document.getElementById('fSL').value.trim();
+  const tp=document.getElementById('fTP').value.trim();
+  const notes=document.getElementById('fNotes').value.trim();
+  if(!date||isNaN(iAUM)||isNaN(cAUM)){alert('Please fill in Date, Inception AUM, and Current AUM.');return;}
+
+  // Calculate P&L net of capital flows
+  const prevEntries=stratEntries(stratId).filter(e=>e.date<date);
+  const prev=prevEntries.length?prevEntries[prevEntries.length-1]:null;
+  const prevAUM=prev?prev.adjAUM||prev.currAUM:iAUM;
+  const adjPrevAUM=prevAUM+cashIn-cashOut;
+  const pnl=cAUM-adjPrevAUM;
+  const pct=adjPrevAUM>0?(pnl/adjPrevAUM)*100:0;
+  const adjAUM=cAUM;
+
+  // Entry type
+  const d=new Date(date);
+  const nd=new Date(d);nd.setDate(d.getDate()+1);
+  const isME=nd.getMonth()!==d.getMonth();
+  let entryType=S[stratId].freq==='wm'?(isME?'monthly':'weekly'):'daily';
+  if(date<todayStr()) entryType=entryType+' (backdated)';
+
+  DB=DB.filter(e=>!(e.strategy===stratId&&e.date===date&&!e.isInterp));
+  DB.push({id:Date.now()+Math.random(),strategy:stratId,date,inceptAUM:iAUM,currAUM:cAUM,cashIn,cashOut,adjAUM,pnl,pct,sl,tp,notes,entryType,isInterp:false});
+  save();
+  closeModal('logOverlay');
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// GAP FILL MODAL
+// ═══════════════════════════════════════════════════════════════════════
+let _gapStratId=null;
+function openGapModal(id){
+  _gapStratId=id;
+  const gaps=detectGaps(id);
+  document.getElementById('gapInfo').innerHTML=`<strong>${S[id].name}</strong> — ${gaps.length} missing period snapshot${gaps.length>1?'s':''} detected. Enter AUM as of each date.`;
+  const el=document.getElementById('gapFields');
+  el.innerHTML=gaps.map((g,i)=>`<div class="fgrp"><label class="flabel">${g.label} — AUM ($)</label><input type="number" class="finput" id="gap_${i}" placeholder="e.g. 5,250,000"></div>`).join('');
+  el.dataset.gaps=JSON.stringify(gaps);
+  document.getElementById('gapOverlay').classList.add('open');
+}
+function submitGap(){
+  const id=_gapStratId;
+  const gaps=JSON.parse(document.getElementById('gapFields').dataset.gaps||'[]');
+  const iAUM=getInceptAUM(id)||0;
+  gaps.forEach((g,i)=>{
+    const cAUM=parseFloat(document.getElementById('gap_'+i).value);
+    if(isNaN(cAUM)||cAUM<=0)return;
+    const prevE=stratEntries(id).filter(e=>e.date<g.date);
+    const prev=prevE.length?prevE[prevE.length-1]:null;
+    const prevAUM=prev?prev.adjAUM||prev.currAUM:iAUM;
+    const pnl=cAUM-prevAUM,pct=prevAUM>0?(pnl/prevAUM)*100:0;
+    DB=DB.filter(e=>!(e.strategy===id&&e.date===g.date));
+    DB.push({id:Date.now()+i,strategy:id,date:g.date,inceptAUM:iAUM,currAUM:cAUM,cashIn:0,cashOut:0,adjAUM:cAUM,pnl,pct,sl:'',tp:'',notes:'Gap fill — period-end snapshot',entryType:g.type});
+  });
+  save();closeModal('gapOverlay');renderAll();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// INTEL / NEWS
+// ═══════════════════════════════════════════════════════════════════════
+const NEWS=[
+  {title:'Fed holds rates; signals "higher for longer" through Q3',body:'FOMC voted unanimously to hold. Fed Chair commentary pointed to sticky services inflation. USD strengthened, short-duration positions outperform.',impact:'HIGH',src:'Bloomberg',time:'2h ago',rel:['macro','hedge']},
+  {title:'S&P 500 at record highs — earnings beats running at 78%',body:'Blended EPS growth tracks +9.2% YoY. Equity futures gained overnight. Long equity and futures longs remain constructive.',impact:'HIGH',src:'Reuters',time:'4h ago',rel:['futures','equity']},
+  {title:'TREND: USD/JPY above 157 — BoJ intervention risk elevated',body:'USD/JPY surged through 157 resistance. Risk/reward for continued USD longs deteriorating. Tighten stops on JPY shorts.',impact:'HIGH',src:'Market Analysis',time:'5h ago',rel:['macro']},
+  {title:'VIX below 13 — complacency building; consider tail hedges',body:'VIX spending 12 sessions below 14. Historically precedes volatility spikes. Add protection ahead of major macro events.',impact:'MED',src:'Goldman Sachs',time:'6h ago',rel:['hedge','futures']},
+  {title:'Tech mega-cap rotation into value — 4th consecutive week',body:'Nasdaq lagging Russell 2000. Consider balancing tech concentration with value/small-cap exposure.',impact:'MED',src:'Barclays',time:'1d ago',rel:['equity','futures','hedge']},
+];
+function renderNews(){
+  document.getElementById('newsContainer').innerHTML=NEWS.map(n=>`
+  <div class="news-item"><div class="ni-hdr"><div class="ni-title">${n.title}</div><span class="ni-imp imp-${n.impact}">${n.impact}</span></div>
+  <div class="ni-body">${n.body}</div>
+  <div class="ni-meta">📰 ${n.src} · 🕐 ${n.time} · ${n.rel.filter(r=>S[r]).map(r=>S[r].name.split(' ')[0]).join(', ')}</div></div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// CURRENCY CHANGE MODAL
+// ═══════════════════════════════════════════════════════════════════════
+function openCcyModal() {
+  document.getElementById('ccyFromDate').value = todayStr();
+  Object.entries(S).forEach(([id,strat]) => {
+    const opt = document.querySelector('#ccyStrat option[value="'+id+'"]');
+    if (opt) opt.textContent = strat.name + ' (currently ' + strat.baseCcy + ')';
+  });
+  renderCcyHistory();
+  renderFxEditor();
+  switchFXTab(1);
+  document.getElementById('ccyOverlay').classList.add('open');
+}
+
+function renderCcyHistory() {
+  const sel = document.getElementById('ccyStrat');
+  if (!sel) return;
+  const id   = sel.value;
+  const hist = (S[id] && S[id].ccyHistory ? S[id].ccyHistory : []).slice()
+                .sort((a,b) => a.fromDate.localeCompare(b.fromDate));
+  const el   = document.getElementById('ccyCurrentHistory');
+  if (!el) return;
+  if (!hist.length) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div style="font-family:DM Mono,monospace;font-size:11px;color:var(--muted);margin-bottom:6px;">CURRENCY HISTORY</div>'
+    + hist.map(h =>
+        '<div style="display:flex;justify-content:space-between;padding:5px 10px;background:var(--panel2);border-radius:5px;margin-bottom:4px;font-family:DM Mono,monospace;font-size:12px;">'
+        + '<span style="color:var(--text)">' + fmtD(h.fromDate) + '</span>'
+        + '<span style="color:#8aabff;font-weight:600">' + h.ccy + '</span>'
+        + '<span style="color:var(--muted)">' + ccySym(h.ccy) + '/US$ = ' + toUSDRate(h.ccy).toFixed(4) + '</span>'
+        + '</div>'
+      ).join('');
+}
+
+function saveCcyChange() {
+  const id   = document.getElementById('ccyStrat').value;
+  const ccy  = document.getElementById('ccyNew').value;
+  const date = document.getElementById('ccyFromDate').value;
+  if (!date) { alert('Please set an effective date.'); return; }
+  changeStratCcy(id, ccy, date);
+  alert('✅ ' + S[id].name + ' base currency changed to ' + ccy + ' from ' + fmtD(date) + '.');
+  closeModal('ccyOverlay');
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ADD NEW STRATEGY (dynamic)
+// ═══════════════════════════════════════════════════════════════════════
+const STRAT_STORE_KEY = 'wiz_strategies';
+
+function loadCustomStrategies(){
+  const saved = JSON.parse(localStorage.getItem(STRAT_STORE_KEY)||'{}');
+  Object.entries(saved).forEach(([id,cfg])=>{
+    if(!S[id]) S[id] = cfg;
+  });
+}
+
+function saveCustomStrategies(){
+  const custom={};
+  Object.entries(S).forEach(([id,cfg])=>{
+    if(!['hedge','macro','futures','equity'].includes(id)) custom[id]=cfg;
+  });
+  localStorage.setItem(STRAT_STORE_KEY, JSON.stringify(custom));
+}
+
+function openAddStratModal(){
+  document.getElementById('nsInceptDate').value = todayStr();
+  document.getElementById('addStratOverlay').classList.add('open');
+}
+
+function saveNewStrategy(){
+  const name     = document.getElementById('nsName').value.trim();
+  const platform = document.getElementById('nsPlatform').value.trim();
+  const type     = document.getElementById('nsType').value;
+  const country  = document.getElementById('nsCountry').value.trim();
+  const ccy      = document.getElementById('nsCcy').value;
+  const tgtW     = parseFloat(document.getElementById('nsTgtW').value)||1.0;
+  const tgtM     = parseFloat(document.getElementById('nsTgtM').value)||4.0;
+  const tgtA     = parseFloat(document.getElementById('nsTgtA').value)||48.0;
+  const color    = document.getElementById('nsColor').value;
+  const inceptDate = document.getElementById('nsInceptDate').value || todayStr();
+
+  if(!name){ alert('Please enter a strategy name.'); return; }
+  if(!country){ alert('Please enter a country.'); return; }
+
+  // Generate a safe ID from the name
+  const id = 'custom_' + name.toLowerCase().replace(/[^a-z0-9]/g,'_') + '_' + Date.now();
+
+  S[id] = {
+    name, platform: platform||country, color, freq: type,
+    country, baseCcy: ccy,
+    target:{ weekly:tgtW, monthly:tgtM, annual:tgtA },
+    ccyHistory:[{fromDate: inceptDate, ccy}],
+    isCustom: true,
+  };
+
+  saveCustomStrategies();
+
+  // Update strategy selects everywhere
+  refreshStrategySelects();
+
+  closeModal('addStratOverlay');
+  renderAll();
+  alert('Strategy "'+name+'" created. You can now log P&L entries for it.');
+}
+
+function refreshStrategySelects(){
+  // Update the strategy dropdown in the log modal
+  const sel = document.getElementById('fStrat');
+  if(!sel) return;
+  sel.innerHTML = Object.entries(S).map(([id,s])=>
+    '<option value="'+id+'">'+s.name+(s.country?' ('+s.country+')':'')+'</option>'
+  ).join('');
+
+  // Update ccy modal select
+  const ccySel = document.getElementById('ccyStrat');
+  if(!ccySel) return;
+  ccySel.innerHTML = Object.entries(S).map(([id,s])=>
+    '<option value="'+id+'">'+s.name+' (currently '+s.baseCcy+')</option>'
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// INVESTMENTS — Property, Pension, Insurance
+// ═══════════════════════════════════════════════════════════════════════
+let INVESTMENTS = JSON.parse(localStorage.getItem('wiz_investments')||'[]');
+const saveInv = () => localStorage.setItem('wiz_investments', JSON.stringify(INVESTMENTS));
+
+let _currentInvType = 'property';
+
+function openAddInvestmentModal(type, editId){
+  _currentInvType = type;
+  // Hide all field sets, show correct one
+  ['property','pension','insurance'].forEach(t=>{
+    document.getElementById('invFields'+t.charAt(0).toUpperCase()+t.slice(1)).style.display = t===type?'block':'none';
+  });
+  const titles = {property:'ADD PROPERTY', pension:'ADD PENSION FUND', insurance:'ADD INSURANCE POLICY'};
+  document.getElementById('invModalTitle').textContent = editId ? titles[type].replace('ADD','EDIT') : titles[type];
+
+  // Pre-fill if editing
+  if(editId){
+    const inv = INVESTMENTS.find(i=>i.id===editId);
+    if(inv) prefillInvestmentForm(inv);
+  } else {
+    clearInvestmentForm();
+    // Default dates
+    document.getElementById('iPropDate').value = todayStr();
+    document.getElementById('iPensDate').value = todayStr();
+    document.getElementById('iInsDate').value  = todayStr();
+  }
+
+  document.getElementById('saveInvBtn').onclick = ()=>saveInvestment(editId);
+  document.getElementById('addInvestmentOverlay').classList.add('open');
+}
+
+function clearInvestmentForm(){
+  ['iPropName','iPropCountry','iPropPurchase','iPropMarket','iPropLoan','iPropRental','iPropNotes',
+   'iPensName','iPensProvider','iPensCountry','iPensValue','iPensContrib','iPensAge','iPensNotes',
+   'iInsName','iInsProvider','iInsCountry','iInsAssured','iInsValue','iInsPremium','iInsMaturity','iInsNotes'
+  ].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('propEquityPreview').style.display='none';
+}
+
+function prefillInvestmentForm(inv){
+  clearInvestmentForm();
+  if(inv.type==='property'){
+    document.getElementById('iPropName').value    = inv.name||'';
+    document.getElementById('iPropCountry').value = inv.country||'';
+    document.getElementById('iPropCcy').value     = inv.ccy||'USD';
+    document.getElementById('iPropDate').value    = inv.purchaseDate||'';
+    document.getElementById('iPropPurchase').value= inv.purchasePrice||'';
+    document.getElementById('iPropMarket').value  = inv.marketValue||'';
+    document.getElementById('iPropLoan').value    = inv.loan||'';
+    document.getElementById('iPropRental').value  = inv.rentalIncome||'';
+    document.getElementById('iPropNotes').value   = inv.notes||'';
+    calcPropEquity();
+  } else if(inv.type==='pension'){
+    document.getElementById('iPensName').value     = inv.name||'';
+    document.getElementById('iPensProvider').value = inv.provider||'';
+    document.getElementById('iPensCountry').value  = inv.country||'';
+    document.getElementById('iPensCcy').value      = inv.ccy||'USD';
+    document.getElementById('iPensValue').value    = inv.value||'';
+    document.getElementById('iPensContrib').value  = inv.annualContrib||'';
+    document.getElementById('iPensAge').value      = inv.retirementAge||'';
+    document.getElementById('iPensDate').value     = inv.asOfDate||'';
+    document.getElementById('iPensNotes').value    = inv.notes||'';
+  } else if(inv.type==='insurance'){
+    document.getElementById('iInsName').value     = inv.name||'';
+    document.getElementById('iInsProvider').value = inv.provider||'';
+    document.getElementById('iInsCountry').value  = inv.country||'';
+    document.getElementById('iInsCcy').value      = inv.ccy||'USD';
+    document.getElementById('iInsType').value     = inv.policyType||'whole_life';
+    document.getElementById('iInsAssured').value  = inv.sumAssured||'';
+    document.getElementById('iInsValue').value    = inv.cashValue||'';
+    document.getElementById('iInsPremium').value  = inv.premium||'';
+    document.getElementById('iInsDate').value     = inv.startDate||'';
+    document.getElementById('iInsMaturity').value = inv.maturityDate||'';
+    document.getElementById('iInsNotes').value    = inv.notes||'';
+  }
+}
+
+function calcPropEquity(){
+  const market = parseFloat(document.getElementById('iPropMarket').value)||0;
+  const loan   = parseFloat(document.getElementById('iPropLoan').value)||0;
+  const purchase = parseFloat(document.getElementById('iPropPurchase').value)||0;
+  if(!market){ document.getElementById('propEquityPreview').style.display='none'; return; }
+  const equity = market - loan;
+  const gain   = purchase ? market - purchase : null;
+  const gainPct= purchase ? ((market-purchase)/purchase*100) : null;
+  const ltv    = market ? (loan/market*100) : null;
+  document.getElementById('pvPropEquity').textContent = fUSD(equity);
+  document.getElementById('pvPropEquity').className = cc(equity);
+  document.getElementById('pvPropGain').textContent  = gain!==null ? fUSD(gain)+' ('+fPct(gainPct)+')' : '—';
+  document.getElementById('pvPropGain').className = gain!==null?cc(gain):'neu';
+  document.getElementById('pvPropLTV').textContent   = ltv!==null ? ltv.toFixed(1)+'%' : '—';
+  document.getElementById('propEquityPreview').style.display = 'block';
+}
+
+function saveInvestment(editId){
+  let inv = {};
+  if(_currentInvType==='property'){
+    const n=document.getElementById('iPropName').value.trim();
+    if(!n){alert('Please enter a property name/address.');return;}
+    inv={type:'property',name:n,
+      country:document.getElementById('iPropCountry').value.trim(),
+      ccy:document.getElementById('iPropCcy').value,
+      purchaseDate:document.getElementById('iPropDate').value,
+      purchasePrice:parseFloat(document.getElementById('iPropPurchase').value)||0,
+      marketValue:parseFloat(document.getElementById('iPropMarket').value)||0,
+      loan:parseFloat(document.getElementById('iPropLoan').value)||0,
+      rentalIncome:parseFloat(document.getElementById('iPropRental').value)||0,
+      notes:document.getElementById('iPropNotes').value.trim(),
+    };
+    inv.netEquity = inv.marketValue - inv.loan;
+    inv.netEquityUSD = toUSD(inv.netEquity, inv.ccy);
+    inv.valueUSD = toUSD(inv.marketValue, inv.ccy);
+  } else if(_currentInvType==='pension'){
+    const n=document.getElementById('iPensName').value.trim();
+    if(!n){alert('Please enter a pension fund name.');return;}
+    inv={type:'pension',name:n,
+      provider:document.getElementById('iPensProvider').value.trim(),
+      country:document.getElementById('iPensCountry').value.trim(),
+      ccy:document.getElementById('iPensCcy').value,
+      value:parseFloat(document.getElementById('iPensValue').value)||0,
+      annualContrib:parseFloat(document.getElementById('iPensContrib').value)||0,
+      retirementAge:parseInt(document.getElementById('iPensAge').value)||65,
+      asOfDate:document.getElementById('iPensDate').value,
+      notes:document.getElementById('iPensNotes').value.trim(),
+    };
+    inv.valueUSD = toUSD(inv.value, inv.ccy);
+  } else if(_currentInvType==='insurance'){
+    const n=document.getElementById('iInsName').value.trim();
+    if(!n){alert('Please enter a policy name.');return;}
+    inv={type:'insurance',name:n,
+      provider:document.getElementById('iInsProvider').value.trim(),
+      country:document.getElementById('iInsCountry').value.trim(),
+      ccy:document.getElementById('iInsCcy').value,
+      policyType:document.getElementById('iInsType').value,
+      sumAssured:parseFloat(document.getElementById('iInsAssured').value)||0,
+      cashValue:parseFloat(document.getElementById('iInsValue').value)||0,
+      premium:parseFloat(document.getElementById('iInsPremium').value)||0,
+      startDate:document.getElementById('iInsDate').value,
+      maturityDate:document.getElementById('iInsMaturity').value,
+      notes:document.getElementById('iInsNotes').value.trim(),
+    };
+    inv.valueUSD = toUSD(inv.cashValue, inv.ccy);
+  }
+
+  if(editId){
+    const idx=INVESTMENTS.findIndex(i=>i.id===editId);
+    if(idx>=0){ inv.id=editId; INVESTMENTS[idx]=inv; }
+  } else {
+    inv.id = 'inv_'+Date.now();
+    INVESTMENTS.push(inv);
+  }
+  saveInv();
+  closeModal('addInvestmentOverlay');
+  renderInvestments();
+  renderSummary();
+}
+
+function deleteInvestment(id){
+  if(!confirm('Delete this investment?')) return;
+  INVESTMENTS = INVESTMENTS.filter(i=>i.id!==id);
+  saveInv();
+  renderInvestments();
+  renderSummary();
+}
+
+// ═ RENDER INVESTMENTS TAB ═
+function renderInvestments(){
+  const props    = INVESTMENTS.filter(i=>i.type==='property');
+  const pensions = INVESTMENTS.filter(i=>i.type==='pension');
+  const insurs   = INVESTMENTS.filter(i=>i.type==='insurance');
+
+  // Totals
+  const sumProp = props.reduce((s,i)=>s+(i.netEquityUSD||0),0);
+  const sumPens = pensions.reduce((s,i)=>s+(i.valueUSD||0),0);
+  const sumIns  = insurs.reduce((s,i)=>s+(i.valueUSD||0),0);
+
+  const spEl=document.getElementById('iSumProperty');
+  if(spEl){spEl.textContent=fUSD(sumProp);spEl.className='sval '+(sumProp>0?'pos':'neu');}
+  const spEl2=document.getElementById('iSumPension');
+  if(spEl2){spEl2.textContent=fUSD(sumPens);spEl2.className='sval '+(sumPens>0?'pos':'neu');}
+  const spEl3=document.getElementById('iSumInsurance');
+  if(spEl3){spEl3.textContent=fUSD(sumIns);spEl3.className='sval '+(sumIns>0?'pos':'neu');}
+
+  // Property section
+  const pEl=document.getElementById('invPropertySection');
+  if(pEl){
+    let h='<div class="inv-section-hdr"><span style="color:#10b981;">&#x2302;</span> PROPERTY</div>';
+    if(!props.length) h+='<div style="color:var(--muted);font-size:12px;padding:8px 0;">No properties added yet.</div>';
+    props.forEach(p=>{
+      const gainPct=p.purchasePrice?(p.marketValue-p.purchasePrice)/p.purchasePrice*100:null;
+      const ltv=p.marketValue?(p.loan/p.marketValue*100):0;
+      h+=`<div class="inv-card">
+        <div class="inv-card-hdr">
+          <div>
+            <div class="inv-card-title">${p.name}</div>
+            <div style="font-size:11px;color:var(--muted);">${p.country||''} &nbsp;·&nbsp; ${ccySym(p.ccy)}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:'DM Mono',monospace;font-size:15px;" class="${cc(p.netEquity)}">${ccySym(p.ccy)}${fUSD(p.netEquity)} <span style="font-size:11px;color:var(--muted);">equity</span></div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">US${fUSD(p.netEquityUSD)}</div>
+          </div>
+        </div>
+        <div class="inv-card-body">
+          <div class="inv-row"><span class="inv-key">Purchase Price</span><span class="inv-val">${ccySym(p.ccy)}${fUSD(p.purchasePrice)}</span></div>
+          <div class="inv-row"><span class="inv-key">Market Value</span><span class="inv-val pos">${ccySym(p.ccy)}${fUSD(p.marketValue)}</span></div>
+          <div class="inv-row"><span class="inv-key">Outstanding Loan</span><span class="inv-val neg">${p.loan?'-'+ccySym(p.ccy)+fUSD(p.loan):'None'}</span></div>
+          <div class="inv-row"><span class="inv-key">Net Equity</span><span class="inv-val ${cc(p.netEquity)}">${ccySym(p.ccy)}${fUSD(p.netEquity)}</span></div>
+          ${gainPct!==null?`<div class="inv-row"><span class="inv-key">Gain on Purchase</span><span class="inv-val ${cc(gainPct)}">${fPct(gainPct)}</span></div>`:''}
+          ${ltv?`<div class="inv-row"><span class="inv-key">Loan-to-Value</span><span class="inv-val ${ltv>80?'neg':ltv>60?'interp':'pos'}">${ltv.toFixed(1)}%</span></div>`:''}
+          ${p.rentalIncome?`<div class="inv-row"><span class="inv-key">Annual Rental Income</span><span class="inv-val pos">${ccySym(p.ccy)}${fUSD(p.rentalIncome)}</span></div>`:''}
+          ${p.notes?`<div class="inv-row"><span class="inv-key">Notes</span><span class="inv-val" style="color:var(--muted);font-size:11px;">${p.notes}</span></div>`:''}
+        </div>
+        <div style="padding:8px 15px;display:flex;gap:8px;border-top:1px solid var(--border);">
+          <button class="edit-btn" onclick="openAddInvestmentModal('property','${p.id}')">Edit</button>
+          <button class="edit-btn" style="color:var(--danger);border-color:rgba(239,68,68,.3);" onclick="deleteInvestment('${p.id}')">Delete</button>
+        </div>
+      </div>`;
+    });
+    pEl.innerHTML=h;
+  }
+
+  // Pension section
+  const pensEl=document.getElementById('invPensionSection');
+  if(pensEl){
+    let h='<div class="inv-section-hdr"><span style="color:#a78bfa;">&#x25a0;</span> PENSION FUNDS</div>';
+    if(!pensions.length) h+='<div style="color:var(--muted);font-size:12px;padding:8px 0;">No pensions added yet.</div>';
+    pensions.forEach(p=>{
+      h+=`<div class="inv-card">
+        <div class="inv-card-hdr">
+          <div>
+            <div class="inv-card-title">${p.name}</div>
+            <div style="font-size:11px;color:var(--muted);">${p.provider||''} &nbsp;·&nbsp; ${p.country||''} &nbsp;·&nbsp; ${ccySym(p.ccy)}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:'DM Mono',monospace;font-size:15px;color:var(--pos);">${ccySym(p.ccy)}${fUSD(p.value)}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">US${fUSD(p.valueUSD)}</div>
+          </div>
+        </div>
+        <div class="inv-card-body">
+          <div class="inv-row"><span class="inv-key">Annual Contribution</span><span class="inv-val">${p.annualContrib?ccySym(p.ccy)+fUSD(p.annualContrib):'—'}</span></div>
+          <div class="inv-row"><span class="inv-key">Retirement Age</span><span class="inv-val">${p.retirementAge||'—'}</span></div>
+          <div class="inv-row"><span class="inv-key">As of Date</span><span class="inv-val">${p.asOfDate?fmtD(p.asOfDate):'—'}</span></div>
+          ${p.notes?`<div class="inv-row"><span class="inv-key">Notes</span><span class="inv-val" style="color:var(--muted);font-size:11px;">${p.notes}</span></div>`:''}
+        </div>
+        <div style="padding:8px 15px;display:flex;gap:8px;border-top:1px solid var(--border);">
+          <button class="edit-btn" onclick="openAddInvestmentModal('pension','${p.id}')">Edit</button>
+          <button class="edit-btn" style="color:var(--danger);border-color:rgba(239,68,68,.3);" onclick="deleteInvestment('${p.id}')">Delete</button>
+        </div>
+      </div>`;
+    });
+    pensEl.innerHTML=h;
+  }
+
+  // Insurance section
+  const insEl=document.getElementById('invInsuranceSection');
+  if(insEl){
+    let h='<div class="inv-section-hdr"><span style="color:#f59e0b;">&#x25a0;</span> INSURANCE POLICIES</div>';
+    if(!insurs.length) h+='<div style="color:var(--muted);font-size:12px;padding:8px 0;">No insurance policies added yet.</div>';
+    insurs.forEach(p=>{
+      const typeLabels={whole_life:'Whole Life',term:'Term Life',endowment:'Endowment',ilp:'ILP',annuity:'Annuity',other:'Other'};
+      h+=`<div class="inv-card">
+        <div class="inv-card-hdr">
+          <div>
+            <div class="inv-card-title">${p.name}</div>
+            <div style="font-size:11px;color:var(--muted);">${p.provider||''} &nbsp;·&nbsp; ${p.country||''} &nbsp;·&nbsp; ${typeLabels[p.policyType]||''}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:'DM Mono',monospace;font-size:15px;color:var(--pos);">${ccySym(p.ccy)}${fUSD(p.cashValue)}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">US${fUSD(p.valueUSD)}</div>
+          </div>
+        </div>
+        <div class="inv-card-body">
+          <div class="inv-row"><span class="inv-key">Sum Assured</span><span class="inv-val">${ccySym(p.ccy)}${fUSD(p.sumAssured)}</span></div>
+          <div class="inv-row"><span class="inv-key">Cash / Surrender Value</span><span class="inv-val pos">${ccySym(p.ccy)}${fUSD(p.cashValue)}</span></div>
+          <div class="inv-row"><span class="inv-key">Annual Premium</span><span class="inv-val neg">${p.premium?ccySym(p.ccy)+fUSD(p.premium):'—'}</span></div>
+          ${p.startDate?`<div class="inv-row"><span class="inv-key">Start Date</span><span class="inv-val">${fmtD(p.startDate)}</span></div>`:''}
+          ${p.maturityDate?`<div class="inv-row"><span class="inv-key">Maturity</span><span class="inv-val">${fmtD(p.maturityDate)}</span></div>`:''}
+          ${p.notes?`<div class="inv-row"><span class="inv-key">Notes</span><span class="inv-val" style="color:var(--muted);font-size:11px;">${p.notes}</span></div>`:''}
+        </div>
+        <div style="padding:8px 15px;display:flex;gap:8px;border-top:1px solid var(--border);">
+          <button class="edit-btn" onclick="openAddInvestmentModal('insurance','${p.id}')">Edit</button>
+          <button class="edit-btn" style="color:var(--danger);border-color:rgba(239,68,68,.3);" onclick="deleteInvestment('${p.id}')">Delete</button>
+        </div>
+      </div>`;
+    });
+    insEl.innerHTML=h;
+  }
+}
+
+// ═ SUMMARY TAB ═
+function renderSummary(){
+  const today=todayStr();
+
+  // ── Trading strategies total (visible only) ──
+  let tradingTotal=0;
+  visibleIds().forEach(id=>{
+    const cs=capitalSummary(id);
+    tradingTotal+=cs.currAUM||0;
+  });
+
+  // ── Investment totals ──
+  const propTotal = INVESTMENTS.filter(i=>i.type==='property').reduce((s,i)=>s+(i.netEquityUSD||0),0);
+  const pensTotal = INVESTMENTS.filter(i=>i.type==='pension').reduce((s,i)=>s+(i.valueUSD||0),0);
+  const insTotal  = INVESTMENTS.filter(i=>i.type==='insurance').reduce((s,i)=>s+(i.valueUSD||0),0);
+  const grandTotal = tradingTotal + propTotal + pensTotal + insTotal;
+
+  // Update summary strip
+  const setEl=(id,v,cls)=>{ const el=document.getElementById(id); if(el){el.textContent=fUSD(v);el.className='sval '+(cls||cc(v));} };
+  setEl('sumGrandTotal', grandTotal, 'pos');
+  setEl('sumTrading',    tradingTotal, 'pos');
+  setEl('sumPropTotal',  propTotal, 'pos');
+  setEl('sumPensTotal',  pensTotal, 'pos');
+  setEl('sumInsTotal',   insTotal, 'pos');
+
+  // ── By Country ──
+  const byCountry = {};
+  // Add trading strategies by country (visible only)
+  visibleEntries().forEach(([id,strat])=>{
+    const cs=capitalSummary(id);
+    const country = strat.country || 'Global';
+    if(!byCountry[country]) byCountry[country]={trading:0,property:0,pension:0,insurance:0};
+    byCountry[country].trading += cs.currAUM||0;
+  });
+  // Add investments by country
+  INVESTMENTS.forEach(inv=>{
+    const c=inv.country||'Unknown';
+    if(!byCountry[c]) byCountry[c]={trading:0,property:0,pension:0,insurance:0};
+    if(inv.type==='property')  byCountry[c].property  += inv.netEquityUSD||0;
+    if(inv.type==='pension')   byCountry[c].pension   += inv.valueUSD||0;
+    if(inv.type==='insurance') byCountry[c].insurance += inv.valueUSD||0;
+  });
+
+  const byCountryEl=document.getElementById('sumByCountry');
+  if(byCountryEl){
+    const sorted=Object.entries(byCountry).map(([c,v])=>{
+      const total=v.trading+v.property+v.pension+v.insurance;
+      return [c,v,total];
+    }).sort((a,b)=>b[2]-a[2]);
+    const maxTotal = sorted.length ? sorted[0][2] : 1;
+    byCountryEl.innerHTML = sorted.map(([c,v,total])=>`
+      <div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+          <div style="font-weight:600;font-size:14px;">${c}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:14px;color:var(--pos);">${fUSD(total)}</div>
+        </div>
+        <div class="country-bar" style="width:${Math.max(4,(total/maxTotal)*100).toFixed(0)}%;"></div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px;margin-top:6px;">
+          ${v.trading?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">Trading: <span style="color:var(--accent)">${fUSD(v.trading)}</span></div>`:''}
+          ${v.property?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">Property: <span style="color:#10b981">${fUSD(v.property)}</span></div>`:''}
+          ${v.pension?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">Pension: <span style="color:#a78bfa">${fUSD(v.pension)}</span></div>`:''}
+          ${v.insurance?`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">Insurance: <span style="color:#f59e0b">${fUSD(v.insurance)}</span></div>`:''}
+        </div>
+      </div>`).join('<hr style="border-color:var(--border);margin:8px 0;">');
+  }
+
+  // ── By Asset Class ──
+  const byClassEl=document.getElementById('sumByClass');
+  if(byClassEl){
+    const classes=[
+      {label:'Trading Strategies', val:tradingTotal, color:'var(--accent)', sub:visibleEntries().map(([id,s])=>{const cs=capitalSummary(id);return cs.currAUM?s.name+': '+fUSD(cs.currAUM):null;}).filter(Boolean).join(' · ')},
+      {label:'Property (Net Equity)', val:propTotal, color:'#10b981', sub:INVESTMENTS.filter(i=>i.type==='property').map(i=>i.name+': '+fUSD(i.netEquityUSD)).join(' · ')||'None added'},
+      {label:'Pension Funds', val:pensTotal, color:'#a78bfa', sub:INVESTMENTS.filter(i=>i.type==='pension').map(i=>i.name+': '+fUSD(i.valueUSD)).join(' · ')||'None added'},
+      {label:'Insurance Policies', val:insTotal, color:'#f59e0b', sub:INVESTMENTS.filter(i=>i.type==='insurance').map(i=>i.name+': '+fUSD(i.valueUSD)).join(' · ')||'None added'},
+    ];
+    const maxClass = Math.max(...classes.map(c=>c.val),1);
+    byClassEl.innerHTML = classes.map(cl=>`
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <span style="font-family:'DM Mono',monospace;font-size:12px;color:${cl.color};">${cl.label}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--text);">${fUSD(cl.val)}</span>
+        </div>
+        <div class="bar-wrap" style="height:6px;"><div class="bar" style="width:${Math.max(2,(cl.val/maxClass)*100).toFixed(0)}%;background:${cl.color};"></div></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px;">${cl.sub}</div>
+      </div>`).join('');
+  }
+
+  // ── Per strategy detail table ──
+  const detEl=document.getElementById('sumDetail');
+  if(detEl){
+    let rows='';
+    visibleEntries().forEach(([id,strat])=>{
+      const cs=capitalSummary(id);
+      const m=calcMetrics(id,today);
+      rows+=`<div class="sum-row">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="dot" style="background:${strat.color};"></div>
+          <div>
+            <div style="font-weight:500;font-size:13px;">${strat.name}</div>
+            <div style="font-size:10px;color:var(--muted);">${strat.country||strat.platform||''} &nbsp;·&nbsp; ${ccySym(strat.baseCcy)}</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:'DM Mono',monospace;font-size:14px;" class="${cc(cs.currAUM)}">${fUSD(cs.currAUM)}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">ITD: ${m&&m.itd!==null?fPct(m.itd):'—'}</div>
+        </div>
+      </div>`;
+    });
+    INVESTMENTS.forEach(inv=>{
+      const val=inv.type==='property'?inv.netEquityUSD:inv.valueUSD;
+      const typeIcon={property:'⌂',pension:'■',insurance:'■'}[inv.type]||'■';
+      rows+=`<div class="sum-row">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="font-size:16px;">${typeIcon}</div>
+          <div>
+            <div style="font-weight:500;font-size:13px;">${inv.name}</div>
+            <div style="font-size:10px;color:var(--muted);">${inv.country||''} &nbsp;·&nbsp; ${ccySym(inv.ccy)} &nbsp;·&nbsp; ${inv.type}</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:'DM Mono',monospace;font-size:14px;" class="pos">${fUSD(val||0)}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">US${fUSD(val||0)}</div>
+        </div>
+      </div>`;
+    });
+    detEl.innerHTML = rows || '<div style="color:var(--muted);padding:12px;">No data yet.</div>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════════════════════
+function switchTab(tab,el){
+  ['dashboard','returns','log','analytics','investments','summary','news'].forEach(t=>{
+    const te=document.getElementById('tab-'+t); if(te) te.style.display='none';
+  });
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+tab).style.display='block';
+  el.classList.add('active');
+  if(tab==='returns')     { renderRMSection('itd'); }
+  if(tab==='analytics')   renderAnalytics();
+  if(tab==='news')        renderNews();
+  if(tab==='log')         renderLog();
+  if(tab==='investments') renderInvestments();
+  if(tab==='summary')     renderSummary();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// QUOTES
+// ═══════════════════════════════════════════════════════════════════════
+const QUOTES=[
+  {text:"The greatest force in the universe is Compound Interest",author:"— Albert Einstein"},
+  {text:"Hard choices, easy life. Easy choices, hard life",author:"— Jerzy Gregorek"},
+  {text:"It's You vs You, make sure You Win",author:""},
+  {text:"Simplicity is the ultimate Sophistication",author:"— Leonardo da Vinci"},
+  {text:"Success is not final, failure is not fatal: it is the courage to continue that counts",author:"— Winston Churchill"},
+];
+let qIdx=0;
+function showQ(i){const el=document.getElementById('quoteText'),q=QUOTES[i];el.classList.add('fading');setTimeout(()=>{el.innerHTML='\u201C'+q.text+'\u201D'+(q.author?` <span class="quote-author">${q.author}</span>`:'');el.classList.remove('fading');},700);}
+function initQuotes(){const el=document.getElementById('quoteText'),q=QUOTES[0];el.innerHTML='\u201C'+q.text+'\u201D'+(q.author?` <span class="quote-author">${q.author}</span>`:'');setInterval(()=>{qIdx=(qIdx+1)%QUOTES.length;showQ(qIdx);},8000);}
+
+// ═══════════════════════════════════════════════════════════════════════
+// INIT + DEMO DATA
+// ═══════════════════════════════════════════════════════════════════════
+function renderAll(){renderDashboard();renderLog();}
+
+function setHeaderDate(){
+  document.getElementById('hdate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+}
+
+function seedDemo(){
+  if(DB.length>0) return;
+  // ── Demo data starting Jan 2023 ──
+  // Each strategy has sparse real checkpoints — inception, some quarter/year-ends,
+  // and recent entries. The interpolation engine fills everything in between.
+  const seed=[
+    // ── HEDGE FUND — inception Jan 2023, sparse quarterly real entries ──
+    {s:'hedge',d:'2023-01-01',iAUM:5000000,cAUM:5000000,cI:0,      cO:0,      sl:'-1.5%',tp:'3%', notes:'Inception'},
+    {s:'hedge',d:'2023-03-31',iAUM:5000000,cAUM:5185000,cI:0,      cO:0,      sl:'-1.5%',tp:'3%', notes:'Q1 2023 end'},
+    {s:'hedge',d:'2023-06-30',iAUM:5000000,cAUM:5310000,cI:0,      cO:100000, sl:'-1.5%',tp:'3%', notes:'Q2 end; withdrew $100k'},
+    {s:'hedge',d:'2023-09-29',iAUM:5000000,cAUM:5240000,cI:0,      cO:0,      sl:'-1.5%',tp:'3%', notes:'Q3 end — drawdown period'},
+    {s:'hedge',d:'2023-12-31',iAUM:5000000,cAUM:5520000,cI:0,      cO:0,      sl:'-1.5%',tp:'3%', notes:'Year-end 2023'},
+    {s:'hedge',d:'2024-03-31',iAUM:5000000,cAUM:5720000,cI:200000, cO:0,      sl:'-1.5%',tp:'3%', notes:'Q1 2024; added $200k'},
+    {s:'hedge',d:'2024-06-28',iAUM:5000000,cAUM:5950000,cI:0,      cO:0,      sl:'-1.5%',tp:'3%', notes:'Q2 2024'},
+    {s:'hedge',d:'2024-09-30',iAUM:5000000,cAUM:6080000,cI:0,      cO:150000, sl:'-1.5%',tp:'3%', notes:'Q3 2024; withdrew $150k'},
+    {s:'hedge',d:'2024-12-31',iAUM:5000000,cAUM:6350000,cI:0,      cO:0,      sl:'-1.5%',tp:'3%', notes:'Year-end 2024'},
+    {s:'hedge',d:'2025-03-31',iAUM:5000000,cAUM:6580000,cI:0,      cO:0,      sl:'-1.5%',tp:'3%', notes:'Q1 2025'},
+    {s:'hedge',d:'2025-06-30',iAUM:5000000,cAUM:6820000,cI:300000, cO:0,      sl:'-1.5%',tp:'3%', notes:'Q2 2025; added $300k'},
+    {s:'hedge',d:'2025-09-30',iAUM:5000000,cAUM:6990000,cI:0,      cO:0,      sl:'-1.5%',tp:'3%', notes:'Q3 2025'},
+    {s:'hedge',d:'2025-12-31',iAUM:5000000,cAUM:7280000,cI:0,      cO:0,      sl:'-1.5%',tp:'3%', notes:'Year-end 2025'},
+    {s:'hedge',d:'2026-02-28',iAUM:5000000,cAUM:7420000,cI:0,      cO:0,      sl:'-1.5%',tp:'3%', notes:'Feb month-end'},
+    {s:'hedge',d:'2026-04-30',iAUM:5000000,cAUM:7560000,cI:0,      cO:200000, sl:'-1.5%',tp:'3%', notes:'Apr month-end; withdrew $200k'},
+    {s:'hedge',d:'2026-05-29',iAUM:5000000,cAUM:7640000,cI:0,      cO:0,      sl:'-1.5%',tp:'3%', notes:'Latest checkpoint'},
+
+    // ── MACRO TRADING — inception Apr 2023, sporadic real entries ──
+    {s:'macro',d:'2023-04-01',iAUM:1200000,cAUM:1200000,cI:0,      cO:0,      sl:'-2%',  tp:'10%',notes:'Inception'},
+    {s:'macro',d:'2023-06-30',iAUM:1200000,cAUM:1410000,cI:0,      cO:0,      sl:'-2%',  tp:'10%',notes:'Strong H1 — USD/JPY'},
+    {s:'macro',d:'2023-12-31',iAUM:1200000,cAUM:1680000,cI:0,      cO:0,      sl:'-2%',  tp:'10%',notes:'Year-end 2023'},
+    {s:'macro',d:'2024-06-28',iAUM:1200000,cAUM:1920000,cI:200000, cO:0,      sl:'-2%',  tp:'10%',notes:'H1 2024; added $200k'},
+    {s:'macro',d:'2024-12-31',iAUM:1200000,cAUM:2180000,cI:0,      cO:0,      sl:'-2%',  tp:'10%',notes:'Year-end 2024'},
+    {s:'macro',d:'2025-06-30',iAUM:1200000,cAUM:2650000,cI:0,      cO:300000, sl:'-2%',  tp:'10%',notes:'H1 2025; withdrew $300k'},
+    {s:'macro',d:'2025-12-31',iAUM:1200000,cAUM:2940000,cI:0,      cO:0,      sl:'-2%',  tp:'10%',notes:'Year-end 2025'},
+    {s:'macro',d:'2026-03-31',iAUM:1200000,cAUM:3180000,cI:0,      cO:0,      sl:'-2%',  tp:'10%',notes:'Q1 2026'},
+    {s:'macro',d:'2026-05-29',iAUM:1200000,cAUM:3320000,cI:0,      cO:0,      sl:'-2%',  tp:'10%',notes:'Latest checkpoint'},
+
+    // ── EQUITY FUTURES — inception Jul 2023 ──
+    {s:'futures',d:'2023-07-01',iAUM:800000,cAUM:800000, cI:0,      cO:0,      sl:'-1%',  tp:'5%', notes:'Inception'},
+    {s:'futures',d:'2023-12-31',iAUM:800000,cAUM:910000, cI:0,      cO:0,      sl:'-1%',  tp:'5%', notes:'Year-end 2023'},
+    {s:'futures',d:'2024-06-28',iAUM:800000,cAUM:1020000,cI:100000, cO:0,      sl:'-1%',  tp:'5%', notes:'H1 2024; added $100k'},
+    {s:'futures',d:'2024-12-31',iAUM:800000,cAUM:1140000,cI:0,      cO:0,      sl:'-1%',  tp:'5%', notes:'Year-end 2024'},
+    {s:'futures',d:'2025-06-30',iAUM:800000,cAUM:1080000,cI:0,      cO:0,      sl:'-1%',  tp:'5%', notes:'H1 2025 — drawdown'},
+    {s:'futures',d:'2025-12-31',iAUM:800000,cAUM:1260000,cI:0,      cO:0,      sl:'-1%',  tp:'5%', notes:'Year-end 2025'},
+    {s:'futures',d:'2026-04-30',iAUM:800000,cAUM:1340000,cI:0,      cO:0,      sl:'-1%',  tp:'5%', notes:'Apr 2026'},
+    {s:'futures',d:'2026-05-29',iAUM:800000,cAUM:1370000,cI:0,      cO:0,      sl:'-1%',  tp:'5%', notes:'Latest checkpoint'},
+
+    // ── LONG-TERM EQUITY — inception Jan 2023, monthly/quarterly snapshots ──
+    {s:'equity',d:'2023-01-01',iAUM:3500000,cAUM:3500000,cI:0,      cO:0,      sl:'',     tp:'',   notes:'Inception'},
+    {s:'equity',d:'2023-06-30',iAUM:3500000,cAUM:3720000,cI:0,      cO:0,      sl:'',     tp:'',   notes:'H1 2023'},
+    {s:'equity',d:'2023-12-31',iAUM:3500000,cAUM:4010000,cI:0,      cO:0,      sl:'',     tp:'',   notes:'Year-end 2023'},
+    {s:'equity',d:'2024-06-28',iAUM:3500000,cAUM:4380000,cI:500000, cO:0,      sl:'',     tp:'',   notes:'H1 2024; added $500k'},
+    {s:'equity',d:'2024-12-31',iAUM:3500000,cAUM:4820000,cI:0,      cO:0,      sl:'',     tp:'',   notes:'Year-end 2024'},
+    {s:'equity',d:'2025-06-30',iAUM:3500000,cAUM:5150000,cI:0,      cO:250000, sl:'',     tp:'',   notes:'H1 2025; withdrew $250k'},
+    {s:'equity',d:'2025-12-31',iAUM:3500000,cAUM:5520000,cI:0,      cO:0,      sl:'',     tp:'',   notes:'Year-end 2025'},
+    {s:'equity',d:'2026-03-31',iAUM:3500000,cAUM:5680000,cI:0,      cO:0,      sl:'',     tp:'',   notes:'Q1 2026'},
+    {s:'equity',d:'2026-05-29',iAUM:3500000,cAUM:5760000,cI:0,      cO:0,      sl:'',     tp:'',   notes:'Latest snapshot'},
+  ];
+
+  seed.forEach(row=>{
+    const prevE=DB.filter(e=>e.strategy===row.s&&e.date<row.d).sort((a,b)=>a.date.localeCompare(b.date));
+    const prev=prevE.length?prevE[prevE.length-1]:null;
+    const prevAUM=prev?prev.adjAUM||prev.currAUM:row.iAUM;
+    const adjPrev=prevAUM+row.cI-row.cO;
+    const pnl=row.cAUM-adjPrev,pct=adjPrev>0?(pnl/adjPrev)*100:0;
+    const nd=new Date(row.d);nd.setDate(nd.getDate()+1);const isME=nd.getMonth()!==new Date(row.d).getMonth();
+    let et=S[row.s].freq==='wm'?(isME?'monthly':'weekly'):'daily';
+    if(row.d<today)et=et+' (backdated)';
+    DB.push({id:Date.now()+Math.random(),strategy:row.s,date:row.d,inceptAUM:row.iAUM,currAUM:row.cAUM,cashIn:row.cI,cashOut:row.cO,adjAUM:row.cAUM,pnl,pct,sl:row.sl,tp:row.tp,notes:row.notes,entryType:et,isInterp:false});
+  });
+  save();
+}
+
+loadFxOverrides();
+loadCustomStrategies();
+loadCcyHistory();
+setHeaderDate();
+seedDemo();
+renderAll();
+refreshStrategySelects();
+initQuotes();
+document.getElementById('customTo').value=todayStr();
+</script>
+
+<script>
+// Hide Safari address bar on scroll
+setTimeout(()=>window.scrollTo(0,1),100);
+</script>
+</body>
+</html>
