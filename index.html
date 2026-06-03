@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0c0f">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <style>
 :root{
   --bg:#0a0c0f;--panel:#111318;--panel2:#161a22;--border:#1e2330;
@@ -3011,20 +3011,31 @@ function seedDemo(){
   save();
 }
 
-loadFxOverrides();
-loadCustomStrategies();
-loadCcyHistory();
-setHeaderDate();
-seedDemo();
-renderAll();
-refreshStrategySelects();
-initQuotes();
-document.getElementById('customTo').value=todayStr();
+try {
+  loadFxOverrides();
+  loadCustomStrategies();
+  loadCcyHistory();
+  setHeaderDate();
+  seedDemo();
+  renderAll();
+  refreshStrategySelects();
+  initQuotes();
+  var customTo = document.getElementById('customTo');
+  if (customTo) customTo.value = todayStr();
+} catch (err) {
+  // Show error visibly so we can diagnose
+  var errBox = document.createElement('div');
+  errBox.style.cssText = 'position:fixed;top:120px;left:10px;right:10px;background:#3a1010;color:#ff6b6b;padding:14px;border-radius:8px;font-family:monospace;font-size:12px;z-index:9999;max-height:50vh;overflow:auto;border:1px solid #ff6b6b;';
+  errBox.innerHTML = '<strong>App init error:</strong><br>' + err.message + '<br><br><pre style="white-space:pre-wrap;font-size:10px;">' + (err.stack || '') + '</pre>';
+  document.body.appendChild(errBox);
+  console.error('Wiz init error:', err);
+}
 </script>
 
 <script>
 // Hide Safari address bar on scroll
 setTimeout(()=>window.scrollTo(0,1),100);
 </script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </body>
 </html>
