@@ -10,245 +10,62 @@
 <meta name="theme-color" content="#0a0c0f">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body {
-  background: #0a0c0f;
-  color: #e8eaf0;
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px;
-  min-height: 100vh;
-  padding: 16px;
-}
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-.logo {
-  font-size: 24px;
-  font-weight: 700;
-  color: #00e5b0;
-  letter-spacing: 3px;
-}
-.btn {
-  background: #00e5b0;
-  color: #000;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  -webkit-appearance: none;
-}
+body { background: #0a0c0f; color: #e8eaf0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; min-height: 100vh; padding: 16px; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 8px; }
+.logo { font-size: 24px; font-weight: 700; color: #00e5b0; letter-spacing: 3px; }
+.btn { background: #00e5b0; color: #000; border: none; border-radius: 8px; padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer; -webkit-appearance: none; }
 .btn:active { opacity: 0.7; }
-.btn-secondary {
-  background: #161a22;
-  color: #00e5b0;
-  border: 1px solid #00e5b0;
-}
-.tabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 16px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-}
-.tab {
-  padding: 8px 14px;
-  background: #161a22;
-  color: #5a6278;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  border: none;
-}
+.btn-fx { background: #161a22; color: #8aabff; border: 1px solid #3b6bff; padding: 10px 12px; }
+.tabs { display: flex; gap: 4px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+.tab { padding: 8px 14px; background: #161a22; color: #5a6278; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; border: none; }
 .tab.active { background: #00e5b0; color: #000; }
-.summary {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.card {
-  background: #111318;
-  border: 1px solid #1e2330;
-  border-radius: 10px;
-  padding: 12px;
-}
-.card-label {
-  font-size: 11px;
-  color: #5a6278;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 4px;
-}
-.card-value {
-  font-size: 18px;
-  font-weight: 600;
-  font-family: ui-monospace, monospace;
-}
-.pos { color: #10b981; }
-.neg { color: #ef4444; }
-.neu { color: #e8eaf0; }
-.strategy {
-  background: #111318;
-  border: 1px solid #1e2330;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  padding: 14px;
-}
-.strategy-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-.strategy-name {
-  font-size: 15px;
-  font-weight: 600;
-}
-.strategy-color-dot {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-right: 8px;
-  vertical-align: middle;
-}
-.strategy-metrics {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-top: 8px;
-}
-.metric {
-  background: #161a22;
-  padding: 8px;
-  border-radius: 6px;
-}
-.metric-label {
-  font-size: 10px;
-  color: #5a6278;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 3px;
-}
-.metric-value {
-  font-size: 13px;
-  font-weight: 600;
-  font-family: ui-monospace, monospace;
-}
-.metric-target {
-  font-size: 10px;
-  color: #5a6278;
-  margin-top: 2px;
-}
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  z-index: 100;
-  align-items: flex-end;
-  justify-content: center;
-}
+.summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
+.card { background: #111318; border: 1px solid #1e2330; border-radius: 10px; padding: 12px; }
+.card-label { font-size: 11px; color: #5a6278; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.card-value { font-size: 18px; font-weight: 600; font-family: ui-monospace, monospace; }
+.pos { color: #10b981; } .neg { color: #ef4444; } .neu { color: #e8eaf0; }
+.strategy { background: #111318; border: 1px solid #1e2330; border-radius: 10px; margin-bottom: 10px; padding: 14px; }
+.strategy-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.strategy-name { font-size: 15px; font-weight: 600; }
+.strategy-color-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.ccy-badge { display: inline-block; font-size: 10px; padding: 2px 6px; background: rgba(59,107,255,0.15); color: #8aabff; border-radius: 4px; margin-left: 6px; font-weight: 600; }
+.strategy-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px; }
+.metric { background: #161a22; padding: 8px; border-radius: 6px; }
+.metric-label { font-size: 10px; color: #5a6278; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+.metric-value { font-size: 13px; font-weight: 600; font-family: ui-monospace, monospace; }
+.metric-target { font-size: 10px; color: #5a6278; margin-top: 2px; }
+.usd-sub { font-size: 11px; color: #5a6278; margin-top: 2px; font-family: ui-monospace, monospace; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; align-items: flex-end; justify-content: center; }
 .modal-overlay.open { display: flex; }
-.modal {
-  background: #111318;
-  border-radius: 16px 16px 0 0;
-  width: 100%;
-  max-width: 600px;
-  max-height: 90vh;
-  overflow-y: auto;
-  padding: 20px;
-}
-.modal-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #00e5b0;
-  margin-bottom: 16px;
-  letter-spacing: 1px;
-}
+.modal { background: #111318; border-radius: 16px 16px 0 0; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 20px; }
+.modal-title { font-size: 18px; font-weight: 700; color: #00e5b0; margin-bottom: 16px; letter-spacing: 1px; }
 .field { margin-bottom: 14px; }
-.field label {
-  display: block;
-  font-size: 11px;
-  color: #5a6278;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-bottom: 5px;
-}
-.field input, .field select {
-  width: 100%;
-  background: #161a22;
-  border: 1px solid #1e2330;
-  border-radius: 8px;
-  padding: 12px;
-  color: #e8eaf0;
-  font-size: 16px;
-  font-family: inherit;
-  -webkit-appearance: none;
-}
-.field input:focus, .field select:focus {
-  outline: none;
-  border-color: #00e5b0;
-}
-.btn-full {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  margin-top: 8px;
-}
-.btn-close {
-  background: #161a22;
-  color: #e8eaf0;
-  margin-bottom: 12px;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-  font-family: ui-monospace, monospace;
-}
-th, td {
-  text-align: left;
-  padding: 8px 10px;
-  border-bottom: 1px solid #1e2330;
-  white-space: nowrap;
-}
-th {
-  font-size: 10px;
-  color: #5a6278;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  background: #161a22;
-}
+.field label { display: block; font-size: 11px; color: #5a6278; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; }
+.field input, .field select { width: 100%; background: #161a22; border: 1px solid #1e2330; border-radius: 8px; padding: 12px; color: #e8eaf0; font-size: 16px; font-family: inherit; -webkit-appearance: none; }
+.field input:focus, .field select:focus { outline: none; border-color: #00e5b0; }
+.btn-full { width: 100%; padding: 14px; font-size: 16px; margin-top: 8px; }
+.btn-close { background: #161a22; color: #e8eaf0; margin-bottom: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: ui-monospace, monospace; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #1e2330; white-space: nowrap; }
+th { font-size: 10px; color: #5a6278; text-transform: uppercase; letter-spacing: 0.5px; background: #161a22; }
 .table-wrap { overflow-x: auto; }
-.tip {
-  background: rgba(0,229,176,0.06);
-  border: 1px solid rgba(0,229,176,0.2);
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 12px;
-  color: #00e5b0;
-  margin-bottom: 12px;
-}
-.empty {
-  text-align: center;
-  padding: 40px 20px;
-  color: #5a6278;
-  font-size: 13px;
-}
+.tip { background: rgba(0,229,176,0.06); border: 1px solid rgba(0,229,176,0.2); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #00e5b0; margin-bottom: 12px; }
+.empty { text-align: center; padding: 40px 20px; color: #5a6278; font-size: 13px; }
+.fx-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.fx-pair { font-family: ui-monospace, monospace; font-size: 13px; min-width: 90px; color: #e8eaf0; }
+.fx-input { flex: 1; background: #161a22; border: 1px solid #1e2330; border-radius: 6px; padding: 8px 10px; color: #e8eaf0; font-size: 14px; font-family: ui-monospace, monospace; -webkit-appearance: none; }
+.fx-cross { font-size: 11px; color: #5a6278; font-family: ui-monospace, monospace; line-height: 1.7; }
+.section-label { font-size: 11px; color: #5a6278; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; margin-top: 14px; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <div class="logo">WIZ</div>
-  <button class="btn" onclick="openLog()">+ LOG P&amp;L</button>
+  <div style="display:flex;gap:6px;">
+    <button class="btn btn-fx" onclick="openFX()">FX</button>
+    <button class="btn" onclick="openLog()">+ LOG</button>
+  </div>
 </div>
 
 <div class="tabs">
@@ -260,12 +77,12 @@ th {
 <div id="tab-dash">
   <div class="summary">
     <div class="card">
-      <div class="card-label">Total AUM</div>
-      <div class="card-value neu" id="totalAUM">$0</div>
+      <div class="card-label">Total AUM (US$)</div>
+      <div class="card-value neu" id="totalAUM">—</div>
     </div>
     <div class="card">
-      <div class="card-label">Total P&amp;L</div>
-      <div class="card-value neu" id="totalPnl">$0</div>
+      <div class="card-label">Total P&amp;L (US$)</div>
+      <div class="card-value neu" id="totalPnl">—</div>
     </div>
   </div>
   <div id="strategies"></div>
@@ -278,9 +95,11 @@ th {
         <tr>
           <th>Date</th>
           <th>Strategy</th>
+          <th>CCY</th>
           <th>Prev AUM</th>
           <th>New AUM</th>
-          <th>P&amp;L</th>
+          <th>P&amp;L (native)</th>
+          <th>P&amp;L (US$)</th>
           <th>%</th>
           <th>Notes</th>
         </tr>
@@ -291,9 +110,7 @@ th {
 </div>
 
 <div id="tab-export" style="display:none;">
-  <div class="tip">
-    Tap below to download all your data as a CSV file. Opens in Numbers (Apple), Excel, or Google Sheets.
-  </div>
+  <div class="tip">Tap below to download all your data as a CSV file. Opens in Numbers, Excel, or Google Sheets.</div>
   <button class="btn btn-full" onclick="exportCSV()">Download CSV</button>
   <div style="margin-top:24px;">
     <div class="card-label">Reset all data</div>
@@ -301,16 +118,17 @@ th {
   </div>
 </div>
 
+<!-- LOG MODAL -->
 <div class="modal-overlay" id="logModal" onclick="if(event.target===this)closeLog()">
   <div class="modal">
     <div class="modal-title">LOG P&amp;L ENTRY</div>
     <div class="field">
       <label>Strategy</label>
-      <select id="fStrat">
-        <option value="hedge">Hedge Fund</option>
-        <option value="macro">Macro Trading (IG)</option>
-        <option value="futures">Equity Futures (IBKR)</option>
-        <option value="equity">Long-Term Equity</option>
+      <select id="fStrat" onchange="updateCcyHint()">
+        <option value="hedge">Hedge Fund (US$)</option>
+        <option value="macro">Macro Trading / IG (£)</option>
+        <option value="futures">Equity Futures / IBKR (S$)</option>
+        <option value="equity">Long-Term Equity (S$)</option>
       </select>
     </div>
     <div class="field">
@@ -318,8 +136,9 @@ th {
       <input type="date" id="fDate">
     </div>
     <div class="field">
-      <label>Current AUM ($)</label>
-      <input type="number" id="fAUM" placeholder="e.g. 5000000" inputmode="decimal">
+      <label id="aumLabel">Current AUM</label>
+      <input type="number" id="fAUM" placeholder="Enter in native currency" inputmode="decimal">
+      <div id="ccyHint" style="font-size:11px;color:#5a6278;margin-top:4px;"></div>
     </div>
     <div class="field">
       <label>Notes (optional)</label>
@@ -330,24 +149,91 @@ th {
   </div>
 </div>
 
+<!-- FX MODAL -->
+<div class="modal-overlay" id="fxModal" onclick="if(event.target===this)closeFX()">
+  <div class="modal">
+    <div class="modal-title">FX RATES</div>
+    <div style="font-size:11px;color:#5a6278;margin-bottom:14px;line-height:1.5;">
+      Convention: BASE/QUOTE = how many QUOTE per 1 BASE.<br>
+      e.g. GBP/USD 1.34 = £1 buys US$1.34
+    </div>
+    <div class="section-label">Direct rates (editable)</div>
+    <div id="fxEditor"></div>
+    <div class="section-label">Calculated cross rates</div>
+    <div class="fx-cross" id="fxCross"></div>
+    <button class="btn btn-full" onclick="saveFX()">Save Rates</button>
+    <button class="btn btn-close btn-full" onclick="closeFX()">Cancel</button>
+  </div>
+</div>
+
 <script>
+// Strategy config with base currencies
 var STRATS = {
-  hedge:   { name: 'Hedge Fund',       color: '#00e5b0', target: { weekly: 1.0,  monthly: 4.0,  annual: 52  } },
-  macro:   { name: 'Macro Trading',    color: '#3b6bff', target: { weekly: 10.0, monthly: 50.0, annual: 600 } },
-  futures: { name: 'Equity Futures',   color: '#f59e0b', target: { weekly: 5.0,  monthly: 20.0, annual: 240 } },
-  equity:  { name: 'Long-Term Equity', color: '#a855f7', target: { weekly: 1.0,  monthly: 4.0,  annual: 48  } }
+  hedge:   { name: 'Hedge Fund',       color: '#00e5b0', ccy: 'USD', target: { weekly: 1.0,  monthly: 4.0,  annual: 52  } },
+  macro:   { name: 'Macro Trading',    color: '#3b6bff', ccy: 'GBP', target: { weekly: 10.0, monthly: 50.0, annual: 600 } },
+  futures: { name: 'Equity Futures',   color: '#f59e0b', ccy: 'SGD', target: { weekly: 5.0,  monthly: 20.0, annual: 240 } },
+  equity:  { name: 'Long-Term Equity', color: '#a855f7', ccy: 'SGD', target: { weekly: 1.0,  monthly: 4.0,  annual: 48  } }
 };
 
-var entries = [];
-try {
-  entries = JSON.parse(localStorage.getItem('wiz_entries') || '[]');
-} catch(e) { entries = []; }
+// Currency symbols
+var CCY_SYM = { USD: 'US$', GBP: '£', SGD: 'S$', EUR: '€', CHF: 'CHF', JPY: '¥', AUD: 'A$', HKD: 'HK$', INR: '₹' };
+function sym(c) { return CCY_SYM[c] || c; }
 
-function save() {
-  try { localStorage.setItem('wiz_entries', JSON.stringify(entries)); } catch(e) {}
+// Direct FX rates: BASE/QUOTE = how many QUOTE per 1 BASE
+// e.g. 'GBP/USD': 1.34 means £1 = US$1.34
+var FX_DEFAULTS = {
+  'GBP/USD': 1.34,
+  'EUR/USD': 1.12,
+  'CHF/USD': 1.25,
+  'SGD/USD': 0.74,
+  'AUD/USD': 0.655,
+  'HKD/USD': 0.128,
+  'JPY/USD': 0.0066,
+  'USD/INR': 96.0,
+  'GBP/CHF': 1.05,
+  'GBP/EUR': 1.15,
+  'GBP/INR': 126.0,
+  'EUR/INR': 110.0,
+  'EUR/CHF': 0.935,
+  'CHF/INR': 106.0
+};
+
+// Load saved FX rates (overrides defaults)
+var FX_RATES = {};
+try {
+  var saved = JSON.parse(localStorage.getItem('wiz_fx') || '{}');
+  for (var k in FX_DEFAULTS) FX_RATES[k] = FX_DEFAULTS[k];
+  for (var k2 in saved) FX_RATES[k2] = saved[k2];
+} catch(e) {
+  for (var k3 in FX_DEFAULTS) FX_RATES[k3] = FX_DEFAULTS[k3];
 }
 
-function fmtMoney(n) {
+// Get rate BASE→QUOTE (direct, inverse, or cross via USD)
+function fxRate(base, quote) {
+  if (base === quote) return 1.0;
+  var key = base + '/' + quote;
+  var inv = quote + '/' + base;
+  if (FX_RATES[key] !== undefined) return FX_RATES[key];
+  if (FX_RATES[inv] !== undefined) return 1.0 / FX_RATES[inv];
+  // Cross via USD
+  if (base !== 'USD' && quote !== 'USD') {
+    var b2u = fxRate(base, 'USD');
+    var q2u = fxRate(quote, 'USD');
+    if (q2u > 0) return b2u / q2u;
+  }
+  return 1.0;
+}
+
+function toUSD(amount, ccy) { return amount * fxRate(ccy, 'USD'); }
+
+// Entries
+var entries = [];
+try { entries = JSON.parse(localStorage.getItem('wiz_entries') || '[]'); } catch(e) { entries = []; }
+function save() { try { localStorage.setItem('wiz_entries', JSON.stringify(entries)); } catch(e) {} }
+function saveFXLocal() { try { localStorage.setItem('wiz_fx', JSON.stringify(FX_RATES)); } catch(e) {} }
+
+// Formatters
+function fmtMoney(n, ccyStr) {
   if (n === null || n === undefined || isNaN(n)) return '—';
   var abs = Math.abs(n);
   var sign = n < 0 ? '-' : '';
@@ -355,40 +241,42 @@ function fmtMoney(n) {
   if (abs >= 1e6) str = (abs/1e6).toFixed(2) + 'M';
   else if (abs >= 1e3) str = (abs/1e3).toFixed(1) + 'K';
   else str = abs.toFixed(0);
-  return sign + '$' + str;
+  var prefix = ccyStr ? sym(ccyStr) : '$';
+  return sign + prefix + str;
 }
-
 function fmtPct(n) {
   if (n === null || n === undefined || isNaN(n)) return '—';
   return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
 }
-
 function colorClass(n) {
   if (n > 0) return 'pos';
   if (n < 0) return 'neg';
   return 'neu';
 }
 
+// Dates
 function todayStr() {
   var d = new Date();
-  var m = (d.getMonth()+1).toString();
-  if (m.length < 2) m = '0' + m;
-  var day = d.getDate().toString();
-  if (day.length < 2) day = '0' + day;
+  var m = (d.getMonth()+1).toString(); if (m.length < 2) m = '0' + m;
+  var day = d.getDate().toString(); if (day.length < 2) day = '0' + day;
   return d.getFullYear() + '-' + m + '-' + day;
 }
-
-function weekStart(dateStr) {
-  var d = new Date(dateStr);
+function weekStart(s) {
+  // Parse YYYY-MM-DD as LOCAL date (not UTC) to avoid timezone shift
+  var parts = s.split('-');
+  var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
   var day = d.getDay();
   var diff = day === 0 ? -6 : 1 - day;
   d.setDate(d.getDate() + diff);
-  return d.toISOString().split('T')[0];
+  var yyyy = d.getFullYear();
+  var mm = (d.getMonth() + 1).toString(); if (mm.length < 2) mm = '0' + mm;
+  var dd = d.getDate().toString(); if (dd.length < 2) dd = '0' + dd;
+  return yyyy + '-' + mm + '-' + dd;
 }
+function monthStart(s) { return s.slice(0,7) + '-01'; }
+function yearStart(s) { return s.slice(0,4) + '-01-01'; }
 
-function monthStart(dateStr) { return dateStr.slice(0,7) + '-01'; }
-function yearStart(dateStr) { return dateStr.slice(0,4) + '-01-01'; }
-
+// Strategy entries
 function getEntries(stratId) {
   var arr = [];
   for (var i = 0; i < entries.length; i++) {
@@ -400,15 +288,13 @@ function getEntries(stratId) {
 
 function periodReturn(stratId, fromDate, toDate) {
   var arr = getEntries(stratId);
-  var inPeriod = [];
+  var inP = [];
   for (var i = 0; i < arr.length; i++) {
-    if (arr[i].date >= fromDate && arr[i].date <= toDate) inPeriod.push(arr[i]);
+    if (arr[i].date >= fromDate && arr[i].date <= toDate) inP.push(arr[i]);
   }
-  if (inPeriod.length === 0) return null;
+  if (inP.length === 0) return null;
   var cum = 1;
-  for (var j = 0; j < inPeriod.length; j++) {
-    cum *= (1 + inPeriod[j].pct / 100);
-  }
+  for (var j = 0; j < inP.length; j++) cum *= (1 + inP[j].pct / 100);
   return (cum - 1) * 100;
 }
 
@@ -417,31 +303,35 @@ function getMetrics(stratId) {
   if (arr.length === 0) return null;
   var latest = arr[arr.length - 1];
   var first = arr[0];
-  var today = latest.date;
+  var ccy = STRATS[stratId].ccy;
   return {
     currAUM: latest.aum,
+    currAUMusd: toUSD(latest.aum, ccy),
     firstAUM: first.aum,
     totalPnL: latest.aum - first.aum,
-    wtd: periodReturn(stratId, weekStart(today), today),
-    mtd: periodReturn(stratId, monthStart(today), today),
-    ytd: periodReturn(stratId, yearStart(today), today),
-    itd: periodReturn(stratId, first.date, today)
+    totalPnLusd: toUSD(latest.aum - first.aum, ccy),
+    wtd: periodReturn(stratId, weekStart(latest.date), latest.date),
+    mtd: periodReturn(stratId, monthStart(latest.date), latest.date),
+    ytd: periodReturn(stratId, yearStart(latest.date), latest.date),
+    itd: periodReturn(stratId, first.date, latest.date)
   };
 }
 
 function renderDashboard() {
   var container = document.getElementById('strategies');
   var html = '';
-  var totalAUM = 0, totalPnL = 0;
+  var totalAUMusd = 0, totalPnLusd = 0;
   for (var id in STRATS) {
     var s = STRATS[id];
     var m = getMetrics(id);
     if (m) {
-      totalAUM += m.currAUM;
-      totalPnL += m.totalPnL;
+      totalAUMusd += m.currAUMusd;
+      totalPnLusd += m.totalPnLusd;
     }
-    var aum = m ? fmtMoney(m.currAUM) : '—';
-    var pnl = m ? fmtMoney(m.totalPnL) : '—';
+    var aum = m ? fmtMoney(m.currAUM, s.ccy) : '—';
+    var aumUSD = m ? fmtMoney(m.currAUMusd, 'USD') : '';
+    var pnl = m ? fmtMoney(m.totalPnL, s.ccy) : '—';
+    var pnlUSD = m ? fmtMoney(m.totalPnLusd, 'USD') : '';
     var pnlClass = m ? colorClass(m.totalPnL) : 'neu';
     var wtd = m && m.wtd !== null ? fmtPct(m.wtd) : '—';
     var mtd = m && m.mtd !== null ? fmtPct(m.mtd) : '—';
@@ -453,10 +343,16 @@ function renderDashboard() {
     var itdC = m && m.itd !== null ? colorClass(m.itd) : 'neu';
     html += '<div class="strategy">' +
       '<div class="strategy-header">' +
-        '<div><span class="strategy-color-dot" style="background:' + s.color + '"></span><span class="strategy-name">' + s.name + '</span></div>' +
+        '<div>' +
+          '<span class="strategy-color-dot" style="background:' + s.color + '"></span>' +
+          '<span class="strategy-name">' + s.name + '</span>' +
+          '<span class="ccy-badge">' + sym(s.ccy) + '</span>' +
+        '</div>' +
         '<div style="text-align:right;">' +
           '<div class="card-value ' + pnlClass + '" style="font-size:14px;">' + pnl + '</div>' +
-          '<div style="font-size:11px;color:#5a6278;">AUM: ' + aum + '</div>' +
+          (pnlUSD ? '<div class="usd-sub">' + pnlUSD + '</div>' : '') +
+          '<div style="font-size:11px;color:#5a6278;margin-top:2px;">AUM: ' + aum + '</div>' +
+          (aumUSD ? '<div class="usd-sub">' + aumUSD + '</div>' : '') +
         '</div>' +
       '</div>' +
       '<div class="strategy-metrics">' +
@@ -468,16 +364,16 @@ function renderDashboard() {
     '</div>';
   }
   container.innerHTML = html;
-  document.getElementById('totalAUM').textContent = totalAUM > 0 ? fmtMoney(totalAUM) : '—';
+  document.getElementById('totalAUM').textContent = totalAUMusd > 0 ? fmtMoney(totalAUMusd, 'USD') : '—';
   document.getElementById('totalAUM').className = 'card-value neu';
-  document.getElementById('totalPnl').textContent = entries.length > 0 ? fmtMoney(totalPnL) : '—';
-  document.getElementById('totalPnl').className = 'card-value ' + colorClass(totalPnL);
+  document.getElementById('totalPnl').textContent = entries.length > 0 ? fmtMoney(totalPnLusd, 'USD') : '—';
+  document.getElementById('totalPnl').className = 'card-value ' + colorClass(totalPnLusd);
 }
 
 function renderHistory() {
   var body = document.getElementById('historyBody');
   if (entries.length === 0) {
-    body.innerHTML = '<tr><td colspan="7" class="empty">No entries yet. Tap + LOG P&amp;L to add one.</td></tr>';
+    body.innerHTML = '<tr><td colspan="9" class="empty">No entries yet. Tap + LOG to add one.</td></tr>';
     return;
   }
   var sorted = entries.slice().sort(function(a, b) { return a.date < b.date ? 1 : -1; });
@@ -485,12 +381,15 @@ function renderHistory() {
   for (var i = 0; i < sorted.length; i++) {
     var e = sorted[i];
     var s = STRATS[e.strategy];
+    var pnlUSD = toUSD(e.pnl, s.ccy);
     html += '<tr>' +
       '<td style="color:#5a6278;">' + e.date + '</td>' +
       '<td><span style="color:' + s.color + ';font-weight:600;">' + s.name + '</span></td>' +
-      '<td>' + fmtMoney(e.prevAUM) + '</td>' +
-      '<td>' + fmtMoney(e.aum) + '</td>' +
-      '<td class="' + colorClass(e.pnl) + '">' + fmtMoney(e.pnl) + '</td>' +
+      '<td style="color:#8aabff;">' + sym(s.ccy) + '</td>' +
+      '<td>' + fmtMoney(e.prevAUM, s.ccy) + '</td>' +
+      '<td>' + fmtMoney(e.aum, s.ccy) + '</td>' +
+      '<td class="' + colorClass(e.pnl) + '">' + fmtMoney(e.pnl, s.ccy) + '</td>' +
+      '<td class="' + colorClass(pnlUSD) + '">' + fmtMoney(pnlUSD, 'USD') + '</td>' +
       '<td class="' + colorClass(e.pct) + '">' + fmtPct(e.pct) + '</td>' +
       '<td style="color:#5a6278;max-width:140px;overflow:hidden;text-overflow:ellipsis;">' + (e.notes || '') + '</td>' +
     '</tr>';
@@ -500,9 +399,7 @@ function renderHistory() {
 
 function showTab(name, btn) {
   var tabs = ['dash', 'history', 'export'];
-  for (var i = 0; i < tabs.length; i++) {
-    document.getElementById('tab-' + tabs[i]).style.display = 'none';
-  }
+  for (var i = 0; i < tabs.length; i++) document.getElementById('tab-' + tabs[i]).style.display = 'none';
   document.getElementById('tab-' + name).style.display = 'block';
   var allTabs = document.querySelectorAll('.tab');
   for (var j = 0; j < allTabs.length; j++) allTabs[j].classList.remove('active');
@@ -511,15 +408,26 @@ function showTab(name, btn) {
   if (name === 'dash') renderDashboard();
 }
 
+// Log modal
 function openLog() {
   document.getElementById('fDate').value = todayStr();
   document.getElementById('fAUM').value = '';
   document.getElementById('fNotes').value = '';
+  updateCcyHint();
   document.getElementById('logModal').classList.add('open');
 }
+function closeLog() { document.getElementById('logModal').classList.remove('open'); }
 
-function closeLog() {
-  document.getElementById('logModal').classList.remove('open');
+function updateCcyHint() {
+  var id = document.getElementById('fStrat').value;
+  var s = STRATS[id];
+  document.getElementById('aumLabel').textContent = 'Current AUM (' + sym(s.ccy) + ')';
+  var rate = fxRate(s.ccy, 'USD');
+  if (s.ccy === 'USD') {
+    document.getElementById('ccyHint').textContent = 'Enter AUM in US$';
+  } else {
+    document.getElementById('ccyHint').textContent = 'Enter AUM in ' + sym(s.ccy) + '. Rate: ' + sym(s.ccy) + '1 = US$' + rate.toFixed(4);
+  }
 }
 
 function saveEntry() {
@@ -530,30 +438,115 @@ function saveEntry() {
   if (notes) notes = notes.replace(/^\s+|\s+$/g, '');
   if (!date) { alert('Please pick a date.'); return; }
   if (isNaN(aum) || aum <= 0) { alert('Please enter a valid AUM amount.'); return; }
-  var prevEntries = [];
-  var all = getEntries(stratId);
-  for (var i = 0; i < all.length; i++) {
-    if (all[i].date < date) prevEntries.push(all[i]);
-  }
-  var prevAUM = prevEntries.length > 0 ? prevEntries[prevEntries.length - 1].aum : aum;
-  var pnl = aum - prevAUM;
-  var pct = prevAUM > 0 ? (pnl / prevAUM) * 100 : 0;
+
+  // Remove any existing entry for same strategy+date
   var filtered = [];
   for (var k = 0; k < entries.length; k++) {
-    if (!(entries[k].strategy === stratId && entries[k].date === date)) {
-      filtered.push(entries[k]);
-    }
+    if (!(entries[k].strategy === stratId && entries[k].date === date)) filtered.push(entries[k]);
   }
   entries = filtered;
-  entries.push({ strategy: stratId, date: date, aum: aum, prevAUM: prevAUM, pnl: pnl, pct: pct, notes: notes });
+
+  // Add new entry with placeholder values — will be recomputed below
+  entries.push({ strategy: stratId, date: date, aum: aum, prevAUM: aum, pnl: 0, pct: 0, notes: notes });
+
+  // Recompute the entire chain for this strategy
+  // (handles backdated entries and replacements correctly)
+  recomputeChain(stratId);
+
   save();
   closeLog();
   renderDashboard();
 }
 
+// Recompute prevAUM, pnl, pct for an entire strategy's chain in date order
+function recomputeChain(stratId) {
+  var stratEntries = getEntries(stratId); // already sorted by date asc
+  for (var i = 0; i < stratEntries.length; i++) {
+    var e = stratEntries[i];
+    var prevAUM = i === 0 ? e.aum : stratEntries[i - 1].aum;
+    e.prevAUM = prevAUM;
+    e.pnl = e.aum - prevAUM;
+    e.pct = prevAUM > 0 ? (e.pnl / prevAUM) * 100 : 0;
+  }
+}
+
+// FX modal
+function openFX() {
+  renderFXEditor();
+  renderFXCross();
+  document.getElementById('fxModal').classList.add('open');
+}
+function closeFX() { document.getElementById('fxModal').classList.remove('open'); }
+
+function renderFXEditor() {
+  var el = document.getElementById('fxEditor');
+  var html = '';
+  var pairs = ['GBP/USD','EUR/USD','CHF/USD','SGD/USD','AUD/USD','HKD/USD','JPY/USD','USD/INR','GBP/CHF','GBP/EUR','GBP/INR','EUR/INR','EUR/CHF','CHF/INR'];
+  for (var i = 0; i < pairs.length; i++) {
+    var pair = pairs[i];
+    var parts = pair.split('/');
+    var label = sym(parts[0]) + '/' + sym(parts[1]);
+    var inputId = 'fx_' + pair.replace('/', '_');
+    var val = FX_RATES[pair] !== undefined ? FX_RATES[pair] : FX_DEFAULTS[pair];
+    html += '<div class="fx-row">' +
+      '<div class="fx-pair">' + label + '</div>' +
+      '<input type="number" step="0.0001" class="fx-input" id="' + inputId + '" value="' + val + '" oninput="renderFXCross()">' +
+      '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function renderFXCross() {
+  // Build a TEMP rate table from inputs (don't mutate FX_RATES yet)
+  var pairs = ['GBP/USD','EUR/USD','CHF/USD','SGD/USD','AUD/USD','HKD/USD','JPY/USD','USD/INR','GBP/CHF','GBP/EUR','GBP/INR','EUR/INR','EUR/CHF','CHF/INR'];
+  var tempRates = {};
+  for (var k in FX_RATES) tempRates[k] = FX_RATES[k];
+  for (var i = 0; i < pairs.length; i++) {
+    var pair = pairs[i];
+    var inputId = 'fx_' + pair.replace('/', '_');
+    var inp = document.getElementById(inputId);
+    if (inp && inp.value) {
+      var v = parseFloat(inp.value);
+      if (!isNaN(v) && v > 0) tempRates[pair] = v;
+    }
+  }
+  // Compute cross rates using temp table (swap FX_RATES briefly)
+  var origRates = FX_RATES;
+  FX_RATES = tempRates;
+  var crosses = [['SGD','GBP'],['SGD','EUR'],['SGD','INR'],['AUD','GBP'],['INR','USD'],['JPY','GBP'],['HKD','INR']];
+  var html = '';
+  for (var j = 0; j < crosses.length; j++) {
+    var b = crosses[j][0], q = crosses[j][1];
+    var r = fxRate(b, q);
+    var rStr = (q === 'INR' || b === 'INR') ? r.toFixed(2) : r.toFixed(4);
+    html += sym(b) + '/' + sym(q) + ' = ' + rStr + '<br>';
+  }
+  document.getElementById('fxCross').innerHTML = html;
+  FX_RATES = origRates; // restore so dashboard uses saved rates
+}
+
+function saveFX() {
+  // Read inputs and commit to FX_RATES (this time for real)
+  var pairs = ['GBP/USD','EUR/USD','CHF/USD','SGD/USD','AUD/USD','HKD/USD','JPY/USD','USD/INR','GBP/CHF','GBP/EUR','GBP/INR','EUR/INR','EUR/CHF','CHF/INR'];
+  for (var i = 0; i < pairs.length; i++) {
+    var pair = pairs[i];
+    var inputId = 'fx_' + pair.replace('/', '_');
+    var inp = document.getElementById(inputId);
+    if (inp && inp.value) {
+      var v = parseFloat(inp.value);
+      if (!isNaN(v) && v > 0) FX_RATES[pair] = v;
+    }
+  }
+  saveFXLocal();
+  closeFX();
+  renderDashboard();
+  alert('FX rates saved.');
+}
+
+// Export
 function exportCSV() {
   if (entries.length === 0) { alert('No data to export yet.'); return; }
-  var headers = ['Date', 'Strategy', 'Previous AUM (USD)', 'Current AUM (USD)', 'Period P&L (USD)', 'Period Return %', 'WTD %', 'MTD %', 'YTD %', 'ITD %', 'Notes'];
+  var headers = ['Date','Strategy','Currency','Previous AUM (native)','Current AUM (native)','Period P&L (native)','Period P&L (US$)','Period Return %','WTD %','MTD %','YTD %','ITD %','Notes'];
   var rows = [headers];
   var sorted = entries.slice().sort(function(a, b) {
     if (a.strategy !== b.strategy) return a.strategy < b.strategy ? -1 : 1;
@@ -562,15 +555,17 @@ function exportCSV() {
   for (var i = 0; i < sorted.length; i++) {
     var e = sorted[i];
     var s = STRATS[e.strategy];
+    var pnlUSD = toUSD(e.pnl, s.ccy);
     var wtd = periodReturn(e.strategy, weekStart(e.date), e.date);
     var mtd = periodReturn(e.strategy, monthStart(e.date), e.date);
     var ytd = periodReturn(e.strategy, yearStart(e.date), e.date);
-    var firstDate = getEntries(e.strategy)[0].date;
-    var itd = periodReturn(e.strategy, firstDate, e.date);
+    var first = getEntries(e.strategy)[0].date;
+    var itd = periodReturn(e.strategy, first, e.date);
     rows.push([
-      e.date, s.name,
+      e.date, s.name, s.ccy,
       e.prevAUM.toFixed(2), e.aum.toFixed(2),
-      e.pnl.toFixed(2), e.pct.toFixed(4),
+      e.pnl.toFixed(2), pnlUSD.toFixed(2),
+      e.pct.toFixed(4),
       wtd !== null ? wtd.toFixed(4) : '',
       mtd !== null ? mtd.toFixed(4) : '',
       ytd !== null ? ytd.toFixed(4) : '',
